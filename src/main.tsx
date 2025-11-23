@@ -15,9 +15,7 @@ import "@syncfusion/ej2-react-grids/styles/material.css";
 
 
 // Register Syncfusion license (you'll need to get a free trial license from syncfusion.com)
-// import { registerLicense } from '@syncfusion/ej2-base';
-// registerLicense('YOUR_LICENSE_KEY_HERE');
-
+import { registerLicense } from '@syncfusion/ej2-base';
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <App />
