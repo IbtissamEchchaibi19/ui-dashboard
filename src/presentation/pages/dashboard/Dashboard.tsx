@@ -6,7 +6,7 @@ import { LineChart, BarChart, PieChart } from '../../components/charts';
 import { Loading } from '../../components/common/Loading';
 import { AnalyticsRepository } from '../../../infrastructure/repositories/AnalyticsRepository';
 import { DashboardKPI, DateRange } from '../../../domain/entities/Analytics';
-import { format, subDays } from 'date-fns';
+import {  subDays } from 'date-fns';
 
 export const Dashboard: React.FC = () => {
   const [kpis, setKpis] = useState<DashboardKPI[]>([]);
