@@ -1,13 +1,16 @@
-import { defineConfig } from "vite";
-import tailwindcss from "@tailwindcss/vite";
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import path from 'path'
 
 export default defineConfig({
-  plugins: [tailwindcss()],
-  css: {
-    postcss: {
-      // Prevent PostCSS from processing node_modules CSS
-      // Fixes the '@import must precede all other statements' error
-      map: true,
+  plugins: [react()],
+  resolve: {
+    alias: {
+      '@domain': path.resolve(__dirname, './src/domain'),
+      '@application': path.resolve(__dirname, './src/application'),
+      '@infrastructure': path.resolve(__dirname, './src/infrastructure'),
+      '@presentation': path.resolve(__dirname, './src/presentation'),
+      '@shared': path.resolve(__dirname, './src/shared'),
     },
   },
-});
+})
