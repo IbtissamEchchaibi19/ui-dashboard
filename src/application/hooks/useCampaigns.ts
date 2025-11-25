@@ -136,3 +136,50 @@ export function useCampaignTimeSeries(
 
   return { data, loading, error };
 }
+
+export interface UseAggregatedMetricsReturn {
+  metrics: {
+    totalImpressions: number;
+    totalClicks: number;
+    totalConversions: number;
+    totalCost: any;
+    averageCtr: number;
+    averageConversionRate: number;
+  } | null;
+  loading: boolean;
+  error: string | null;
+}
+
+export function useAggregatedMetrics(
+  campaigns: Campaign[],
+  dateRange?: DateRange
+): UseAggregatedMetricsReturn {
+  const [metrics, setMetrics] = useState<UseAggregatedMetricsReturn['metrics']>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!campaigns || campaigns.length === 0) {
+      setMetrics(null);
+      setLoading(false);
+      return;
+    }
+
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const result = await campaignService.getAggregatedMetrics(campaigns, dateRange);
+        setMetrics(result);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to fetch aggregated metrics');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [campaigns, dateRange]);
+
+  return { metrics, loading, error };
+}
