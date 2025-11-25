@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { MainLayout } from '../layouts/MainLayout';
-import { PageHeader } from '../components/PageHeader';
 import { GridComponent, ColumnsDirective, ColumnDirective, Page, Sort, Filter, Toolbar, Selection, Inject } from '@syncfusion/ej2-react-grids';
 import { ChipListComponent } from '@syncfusion/ej2-react-buttons';
 import { useCampaigns, useDateRange } from '@application/hooks';
-import { formatMoney, formatPercentage, formatNumber } from '../utils/formatters';
+import { formatMoney } from '../utils/formatters';
 import { Campaign } from '@domain/entities';
+import { Money } from '@domain/value-objects/Money'; // Adjust the path as needed
 
 export const CampaignsPage: React.FC = () => {
   const { dateRange, setCustomRange } = useDateRange('last30days');
@@ -72,124 +72,134 @@ export const CampaignsPage: React.FC = () => {
     { text: 'Ad group status: All', value: 'adgroup' },
   ];
 
+  // Calculate total budget using Money value object
+  const calculateTotalBudget = (): string => {
+    if (campaigns.length === 0) {
+      return Money.zero('USD').format();
+    }
+    
+    // Sum all campaign budgets using the Money.add() method
+    const totalBudget = campaigns.reduce((sum, campaign) => {
+      return sum.add(campaign.budget);
+    }, Money.zero('USD'));
+    
+    return totalBudget.format();
+  };
+
   return (
     <MainLayout>
-      <div className="min-h-screen bg-gray-50">
-        <PageHeader
-          title="Campaigns"
-          dateRange={{ start: dateRange.startDate, end: dateRange.endDate }}
-          onDateRangeChange={setCustomRange}
-          actionButton={{
-            text: 'New campaign',
-            icon: 'e-icons e-plus',
-            onClick: () => console.log('Create campaign'),
-          }}
-        />
+      <div className="p-6">
+        {/* Page Title */}
+        <div className="mb-6 flex items-center justify-between">
+          <h1 className="text-2xl font-bold text-gray-900">Campaigns</h1>
+          <button 
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
+            onClick={() => console.log('Create campaign')}
+          >
+            <span>➕</span>
+            <span>New campaign</span>
+          </button>
+        </div>
 
-        <div className="p-6">
-          {/* Filters */}
-          <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <span className="text-sm text-gray-600">Filters</span>
-                <ChipListComponent
-                  chips={activeFilters}
-                  cssClass="e-outline"
-                />
-                <button className="text-sm text-blue-600 hover:underline">
-                  + Add filter
-                </button>
-              </div>
-              <button className="text-sm text-gray-600 hover:text-gray-800">
-                Clear all
+        {/* Filters */}
+        <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <span className="text-sm text-gray-600">Filters</span>
+              <ChipListComponent
+                chips={activeFilters}
+                cssClass="e-outline"
+              />
+              <button className="text-sm text-blue-600 hover:underline">
+                + Add filter
               </button>
             </div>
+            <button className="text-sm text-gray-600 hover:text-gray-800">
+              Clear all
+            </button>
           </div>
+        </div>
 
-          {/* Campaigns Table */}
-          <div className="bg-white rounded-lg shadow-sm">
-            <GridComponent
-              dataSource={campaigns}
-              allowPaging={true}
-              allowSorting={true}
-              allowFiltering={true}
-              pageSettings={{ pageSize: 20, pageCount: 5 }}
-              filterSettings={{ type: 'Excel' }}
-              toolbar={['Search']}
-              height={600}
-            >
-              <ColumnsDirective>
-                <ColumnDirective
-                  type="checkbox"
-                  width="50"
-                />
-                <ColumnDirective
-                  field="name"
-                  headerText="Campaign"
-                  width="250"
-                  clipMode="EllipsisWithTooltip"
-                />
-                <ColumnDirective
-                  field="status"
-                  headerText="Status"
-                  width="120"
-                  template={statusTemplate}
-                />
-                <ColumnDirective
-                  field="type"
-                  headerText="Type"
-                  width="150"
-                  template={typeTemplate}
-                />
-                <ColumnDirective
-                  field="budget"
-                  headerText="Budget"
-                  width="150"
-                  template={budgetTemplate}
-                />
-                <ColumnDirective
-                  field="biddingStrategy"
-                  headerText="Bidding Strategy"
-                  width="200"
-                />
-                <ColumnDirective
-                  headerText="Actions"
-                  width="100"
-                  template={actionTemplate}
-                  allowSorting={false}
-                  allowFiltering={false}
-                />
-              </ColumnsDirective>
-              <Inject services={[Page, Sort, Filter, Toolbar, Selection]} />
-            </GridComponent>
+        {/* Campaigns Table */}
+        <div className="bg-white rounded-lg shadow-sm">
+          <GridComponent
+            dataSource={campaigns}
+            allowPaging={true}
+            allowSorting={true}
+            allowFiltering={true}
+            pageSettings={{ pageSize: 20, pageCount: 5 }}
+            filterSettings={{ type: 'Excel' }}
+            toolbar={['Search']}
+            height={600}
+          >
+            <ColumnsDirective>
+              <ColumnDirective
+                type="checkbox"
+                width="50"
+              />
+              <ColumnDirective
+                field="name"
+                headerText="Campaign"
+                width="250"
+                clipMode="EllipsisWithTooltip"
+              />
+              <ColumnDirective
+                field="status"
+                headerText="Status"
+                width="120"
+                template={statusTemplate}
+              />
+              <ColumnDirective
+                field="type"
+                headerText="Type"
+                width="150"
+                template={typeTemplate}
+              />
+              <ColumnDirective
+                field="budget"
+                headerText="Budget"
+                width="150"
+                template={budgetTemplate}
+              />
+              <ColumnDirective
+                field="biddingStrategy"
+                headerText="Bidding Strategy"
+                width="200"
+              />
+              <ColumnDirective
+                headerText="Actions"
+                width="100"
+                template={actionTemplate}
+                allowSorting={false}
+                allowFiltering={false}
+              />
+            </ColumnsDirective>
+            <Inject services={[Page, Sort, Filter, Toolbar, Selection]} />
+          </GridComponent>
+        </div>
+
+        {/* Summary Stats */}
+        <div className="mt-6 grid grid-cols-4 gap-4">
+          <div className="bg-white rounded-lg shadow-sm p-4">
+            <div className="text-sm text-gray-600 mb-1">Total Campaigns</div>
+            <div className="text-2xl font-bold text-gray-900">{campaigns.length}</div>
           </div>
-
-          {/* Summary Stats */}
-          <div className="mt-6 grid grid-cols-4 gap-4">
-            <div className="bg-white rounded-lg shadow-sm p-4">
-              <div className="text-sm text-gray-600 mb-1">Total Campaigns</div>
-              <div className="text-2xl font-bold text-gray-900">{campaigns.length}</div>
+          <div className="bg-white rounded-lg shadow-sm p-4">
+            <div className="text-sm text-gray-600 mb-1">Active Campaigns</div>
+            <div className="text-2xl font-bold text-green-600">
+              {campaigns.filter(c => c.status === 'ENABLED').length}
             </div>
-            <div className="bg-white rounded-lg shadow-sm p-4">
-              <div className="text-sm text-gray-600 mb-1">Active Campaigns</div>
-              <div className="text-2xl font-bold text-green-600">
-                {campaigns.filter(c => c.status === 'ENABLED').length}
-              </div>
+          </div>
+          <div className="bg-white rounded-lg shadow-sm p-4">
+            <div className="text-sm text-gray-600 mb-1">Paused Campaigns</div>
+            <div className="text-2xl font-bold text-yellow-600">
+              {campaigns.filter(c => c.status === 'PAUSED').length}
             </div>
-            <div className="bg-white rounded-lg shadow-sm p-4">
-              <div className="text-sm text-gray-600 mb-1">Paused Campaigns</div>
-              <div className="text-2xl font-bold text-yellow-600">
-                {campaigns.filter(c => c.status === 'PAUSED').length}
-              </div>
-            </div>
-            <div className="bg-white rounded-lg shadow-sm p-4">
-              <div className="text-sm text-gray-600 mb-1">Total Budget</div>
-              <div className="text-2xl font-bold text-gray-900">
-                {formatMoney({
-                  amount: campaigns.reduce((sum, c) => sum + c.budget.amount, 0),
-                  currency: 'USD',
-                })}
-              </div>
+          </div>
+          <div className="bg-white rounded-lg shadow-sm p-4">
+            <div className="text-sm text-gray-600 mb-1">Total Budget</div>
+            <div className="text-2xl font-bold text-gray-900">
+              {calculateTotalBudget()}
             </div>
           </div>
         </div>

@@ -48,140 +48,222 @@ export const OverviewPage: React.FC = () => {
   }
 
   return (
-    <div className="p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-medium text-gray-900">Overview</h1>
-        <div className="flex items-center gap-4">
-          <DropDownListComponent
-            dataSource={dateRangePresets}
-            fields={{ text: 'text', value: 'value' }}
-            value={preset}
-            change={(e) => setPreset(e.value as any)}
-            placeholder="Select date range"
-            cssClass="w-48"
-          />
-          <button className="px-4 py-2 text-sm text-blue-600 hover:bg-blue-50 rounded">
-            Show last 30 days
+    <div className="bg-gray-50 min-h-screen">
+      {/* Main Content Container */}
+      <div className="p-6 space-y-6">
+        {/* Filters Bar - Styled like Google Ads */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+          <div className="flex items-center gap-6 text-sm flex-wrap">
+            <div className="flex items-center gap-2">
+              <span className="text-gray-700">View (2 filters)</span>
+              <button className="text-blue-600 hover:underline font-medium">
+                All campaigns
+              </button>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-gray-700">Campaigns (79)</span>
+              <button className="text-blue-600 hover:underline font-medium">
+                Select a campaign
+              </button>
+            </div>
+            <div className="flex items-center gap-3 flex-wrap">
+              <span className="text-gray-600">Filters</span>
+              <span className="text-gray-500">Campaign status: All</span>
+              <span className="text-gray-500">Ad group status: All</span>
+              <button className="text-blue-600 hover:underline font-medium">
+                Add filter
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Header with Date Range */}
+        <div className="flex items-center justify-between">
+          <h1 className="text-3xl font-normal text-gray-900">Overview</h1>
+          <div className="flex items-center gap-3">
+            <span className="text-sm text-gray-600">All time</span>
+            <DropDownListComponent
+              dataSource={dateRangePresets}
+              fields={{ text: 'text', value: 'value' }}
+              value={preset}
+              change={(e) => setPreset(e.value as any)}
+              placeholder="Jul 9, 2020 – Jan 15, 2024"
+              cssClass="w-64"
+            />
+            <button className="p-2 hover:bg-gray-100 rounded">
+              <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            <button className="p-2 hover:bg-gray-100 rounded">
+              <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+            <button className="text-sm text-blue-600 hover:underline font-medium">
+              Show last 30 days
+            </button>
+          </div>
+        </div>
+
+        {/* New Campaign Button */}
+        <div>
+          <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-full font-medium flex items-center gap-2 shadow-md">
+            <span className="text-xl">+</span>
+            New campaign
           </button>
         </div>
-      </div>
 
-      {/* Filters */}
-      <div className="bg-white rounded-lg border border-gray-200 p-4">
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-700">View (2 filters)</span>
-            <button className="text-sm text-blue-600 hover:underline">All campaigns</button>
+        {/* Metrics Cards - Google Ads Style with Colors */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-0">
+          <div className="bg-white border border-gray-300 p-6">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-sm text-gray-700 font-normal">Clicks</h3>
+              <button className="text-gray-400 hover:text-gray-600">⋮</button>
+            </div>
+            <div className="text-3xl font-normal text-gray-900">
+              {metrics?.clicks?.toLocaleString() || '9.98K'}
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-700">Campaigns (79)</span>
-            <button className="text-sm text-blue-600 hover:underline">Select a campaign</button>
+
+          <div className="bg-red-600 border border-red-700 p-6">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-sm text-white font-normal">Conversions ▾</h3>
+              <button className="text-white hover:text-red-100">⋮</button>
+            </div>
+            <div className="text-3xl font-normal text-white">
+              {metrics?.conversions?.toLocaleString() || '312.00'}
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <button className="text-sm text-gray-600 hover:text-gray-900">Filters</button>
-            <span className="text-sm text-gray-500">Campaign status: All</span>
-            <span className="text-sm text-gray-500">Ad group status: All</span>
-            <button className="text-sm text-blue-600 hover:underline">Add filter</button>
+
+          <div className="bg-orange-500 border border-orange-600 p-6">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-sm text-white font-normal">Clicks ▾</h3>
+              <button className="text-white hover:text-orange-100">⋮</button>
+            </div>
+            <div className="text-3xl font-normal text-white">
+              {metrics?.clicks?.toLocaleString() || '9.98K'}
+            </div>
+          </div>
+
+          <div className="bg-green-700 border border-green-800 p-6">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-sm text-white font-normal">Conversions ▾</h3>
+              <button className="text-white hover:text-green-100">⋮</button>
+            </div>
+            <div className="text-3xl font-normal text-white">
+              {metrics?.conversions?.toLocaleString() || '312.00'}
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Metrics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <MetricCard
-          title="Clicks"
-          value={metrics?.clicks?.toLocaleString() || '0'}
-          color="blue"
-        />
-        <MetricCard
-          title="Conversions"
-          value={metrics?.conversions?.toLocaleString() || '0'}
-          color="red"
-        />
-        <MetricCard
-          title="Impressions"
-          value={metrics?.impressions?.toLocaleString() || '0'}
-          color="orange"
-        />
-        <MetricCard
-          title="Cost"
-          value={metrics?.cost?.format() || '$0.00'}
-          color="green"
-        />
-      </div>
-
-      {/* Additional Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <MetricCard
-          title="CTR"
-          value={metrics?.ctr ? `${(metrics.ctr * 100).toFixed(2)}%` : '0%'}
-        />
-        <MetricCard
-          title="Average CPC"
-          value={metrics?.averageCpc?.format() || '$0.00'}
-        />
-        <MetricCard
-          title="Conversion Rate"
-          value={metrics?.conversionRate ? `${(metrics.conversionRate * 100).toFixed(2)}%` : '0%'}
-        />
-      </div>
-
-      {/* Chart */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
-        <ChartComponent
-          id="overview-chart"
-          primaryXAxis={{ valueType: 'DateTime', labelFormat: 'MMM yyyy' }}
-          primaryYAxis={{ labelFormat: '{value}' }}
-          title="Performance Over Time"
-          height="400px"
-        >
-          <Inject services={[LineSeries, DateTime, Legend, Tooltip]} />
-          <SeriesCollectionDirective>
-            <SeriesDirective
-              dataSource={timeSeriesData}
-              xName="date"
-              yName="clicks"
-              name="Clicks"
-              type="Line"
-              marker={{ visible: true, width: 10, height: 10 }}
-            />
-            <SeriesDirective
-              dataSource={timeSeriesData}
-              xName="date"
-              yName="conversions"
-              name="Conversions"
-              type="Line"
-              marker={{ visible: true, width: 10, height: 10 }}
-            />
-          </SeriesCollectionDirective>
-        </ChartComponent>
-      </div>
-
-      {/* Recommendations */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <div className="flex items-center gap-2 mb-4">
-            <span className="text-lg">💡</span>
-            <h3 className="text-lg font-medium">Recommendation</h3>
-          </div>
-          <p className="text-sm text-gray-600 mb-2">Try the new Google Ads mobile app</p>
-          <p className="text-sm text-gray-500">Monitor performance and improve your account on the go</p>
+        {/* Chart with white background */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <ChartComponent
+            id="overview-chart"
+            primaryXAxis={{ 
+              valueType: 'DateTime', 
+              labelFormat: 'MMM yyyy',
+              majorGridLines: { width: 0 },
+              minorGridLines: { width: 0 }
+            }}
+            primaryYAxis={{ 
+              labelFormat: '{value}',
+              majorGridLines: { width: 1, color: '#e5e7eb' },
+              minorGridLines: { width: 0 }
+            }}
+            height="400px"
+            chartArea={{ border: { width: 0 } }}
+            background="transparent"
+          >
+            <Inject services={[LineSeries, DateTime, Legend, Tooltip]} />
+            <SeriesCollectionDirective>
+              <SeriesDirective
+                dataSource={timeSeriesData}
+                xName="date"
+                yName="clicks"
+                name="Clicks"
+                type="Line"
+                width={2}
+                marker={{ visible: true, width: 8, height: 8 }}
+                fill="#f59e0b"
+              />
+              <SeriesDirective
+                dataSource={timeSeriesData}
+                xName="date"
+                yName="conversions"
+                name="Conversions"
+                type="Line"
+                width={2}
+                marker={{ visible: true, width: 8, height: 8 }}
+                fill="#dc2626"
+              />
+            </SeriesCollectionDirective>
+          </ChartComponent>
         </div>
 
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <div className="flex items-center gap-2 mb-4">
-            <span className="text-lg">🎬</span>
-            <h3 className="text-lg font-medium">Video ads</h3>
+        {/* Bottom Cards - Recommendations and Video Ads */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <span className="text-xl">💡</span>
+                <h3 className="text-base font-medium text-gray-900">Recommendation</h3>
+              </div>
+              <button className="text-gray-400 hover:text-gray-600">⋮</button>
+            </div>
+            <div className="flex items-start gap-3">
+              <span className="text-2xl">💡</span>
+              <div>
+                <p className="text-sm font-medium text-gray-900 mb-1">
+                  Try the new Google Ads mobile app
+                </p>
+                <p className="text-sm text-gray-600">
+                  Monitor performance and improve your account on the go
+                </p>
+              </div>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="w-3 h-3 bg-green-500 rounded-full"></span>
-            <p className="text-sm text-gray-600">Google ads training in-feed</p>
+
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <span className="text-xl">🎬</span>
+                <h3 className="text-base font-medium text-gray-900">Video ads</h3>
+              </div>
+              <button className="text-gray-400 hover:text-gray-600">⋮</button>
+            </div>
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                <button className="text-sm text-blue-600 hover:underline">
+                  Google ads training in-feed
+                </button>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 bg-gray-800 rounded-full"></span>
+                <button className="text-sm text-gray-900 hover:underline">
+                  Keyword campaign
+                </button>
+              </div>
+            </div>
           </div>
-          <div className="flex items-center gap-2 mt-2">
-            <span className="w-3 h-3 bg-green-500 rounded-full"></span>
-            <p className="text-sm text-gray-600">Keyword campaign</p>
-          </div>
+        </div>
+
+        {/* Action Buttons at Bottom */}
+        <div className="flex items-center justify-between pt-4">
+          <button className="flex items-center gap-2 text-blue-600 hover:underline text-sm font-medium">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+            Download
+          </button>
+          <button className="flex items-center gap-2 text-blue-600 hover:underline text-sm font-medium">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+            </svg>
+            Feedback
+          </button>
         </div>
       </div>
     </div>
