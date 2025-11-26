@@ -12,10 +12,8 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(true);
 
   const menuItems = [
-    { id: 'overview', text: 'Overview', icon: 'e-icons e-home', route: '/overview' },
-    { id: 'campaigns', text: 'Campaigns', icon: 'e-icons e-broadcast', route: '/campaigns' },
-    { id: 'keywords', text: 'Search keywords', icon: 'e-icons e-search', route: '/keywords' },
-    { id: 'audiences', text: 'Audiences', icon: 'e-icons e-people', route: '/audiences' },
+    { id: 'campaigns', text: 'Campaigns', route: '/campaigns' },
+    { id: 'audiences', text: 'Audiences', route: '/audiences' },
   ];
 
   const handleMenuClick = (route: string): void => {

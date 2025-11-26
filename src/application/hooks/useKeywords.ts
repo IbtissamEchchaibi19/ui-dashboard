@@ -1,3 +1,4 @@
+// usekeyword
 import { useState, useEffect, useCallback } from 'react';
 import { Keyword, KeywordMetrics } from '@domain/entities';
 import { keywordService } from '@application/services';

@@ -1,6 +1,6 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useCampaigns, useDateRange, useCampaignTimeSeries } from '@application/hooks';
-import { Campaign, CampaignMetrics } from '@domain/entities';
+import { Campaign } from '@domain/entities';
 import { CampaignStatus, CampaignType } from '@domain/enums';
 import { campaignService } from '@application/services';
 import { CampaignFilters } from '@infrastructure/repositories';
@@ -19,7 +19,6 @@ import { ButtonComponent } from '@syncfusion/ej2-react-buttons';
 import { TextBoxComponent } from '@syncfusion/ej2-react-inputs';
 import { CheckBoxComponent } from '@syncfusion/ej2-react-buttons';
 import { DialogComponent } from '@syncfusion/ej2-react-popups';
-import { MenuComponent } from '@syncfusion/ej2-react-navigations';
 
 interface AdGroupRow {
   name: string;
@@ -37,7 +36,7 @@ type MetricColumn = 'impressions' | 'clicks' | 'conversions' | 'cost' | 'ctr' | 
 export const CampaignsPage: React.FC = () => {
   // Hooks
   const [initialFilters] = useState<CampaignFilters>({});
-  const { campaigns, loading, error, updateFilters, filters, refetch } = useCampaigns(initialFilters);
+  const { campaigns, loading, error, updateFilters, refetch } = useCampaigns(initialFilters);
   const { dateRange, preset, setPreset, formatDisplay } = useDateRange('last7days');
   
   // State
