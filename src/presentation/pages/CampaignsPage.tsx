@@ -1,9 +1,16 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
+// ✅ ONLY import from application hooks - NO domain imports
 import { useCampaigns, useDateRange, useCampaignTimeSeries } from '@application/hooks';
-import { Campaign } from '@domain/entities';
-import { CampaignStatus, CampaignType } from '@domain/enums';
 import { campaignService } from '@application/services';
-import { CampaignFilters } from '@infrastructure/repositories';
+import { 
+  CampaignStatusUI, 
+  CampaignTypeUI, 
+  CampaignUI,
+  MetricColumn,
+  AdGroupRow
+} from '@application/dto';
+
+// UI library imports (external dependencies)
 import { 
   ChartComponent, 
   SeriesCollectionDirective, 
@@ -20,33 +27,37 @@ import { TextBoxComponent } from '@syncfusion/ej2-react-inputs';
 import { CheckBoxComponent } from '@syncfusion/ej2-react-buttons';
 import { DialogComponent } from '@syncfusion/ej2-react-popups';
 
-interface AdGroupRow {
-  name: string;
-  impressions: number;
-  clicks: number;
-  interactionRate: string;
-  avgCost: string;
-  cost: string;
-  conversions?: number;
-  conversionRate?: string;
-}
-
-type MetricColumn = 'impressions' | 'clicks' | 'conversions' | 'cost' | 'ctr' | 'conversionRate' | 'avgCost';
-
 export const CampaignsPage: React.FC = () => {
-  // Hooks
-  const [initialFilters] = useState<CampaignFilters>({});
-  const { campaigns, loading, error, updateFilters, refetch } = useCampaigns(initialFilters);
+  // Backend filters state (what gets sent to hooks)
+  const [backendFilters, setBackendFilters] = useState<any>({});
+  
+  // Local filters state (UI state before applying)
+  const [localFilters, setLocalFilters] = useState<{
+    campaignStatus: CampaignStatusUI[];
+    campaignType: CampaignTypeUI[];
+    minBudget?: number;
+    maxBudget?: number;
+  }>({
+    campaignStatus: [],
+    campaignType: []
+  });
+  
+  // ✅ Use existing hooks EXACTLY as they were - NO changes
+  const { campaigns, loading, error, updateFilters,refetch } = useCampaigns(backendFilters);
   const { dateRange, preset, setPreset, formatDisplay } = useDateRange('last7days');
   
-  // State
+  // UI State
   const [selectedCampaignId, setSelectedCampaignId] = useState<string | null>(null);
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
   const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
-  const [searchText, setSearchText] = useState('');
+  const [topSearchText, setTopSearchText] = useState(''); // Top bar search (name/page only)
+  const [tableSearchText, setTableSearchText] = useState(''); // Table keyword search (all fields)
+  const [showTableSearchDialog, setShowTableSearchDialog] = useState(false); // Dialog for table search
   const [showFilterDialog, setShowFilterDialog] = useState(false);
   const [showColumnDialog, setShowColumnDialog] = useState(false);
   const [showSegmentDialog, setShowSegmentDialog] = useState(false);
+  const [showReportsMenu, setShowReportsMenu] = useState(false);
+  const [showMoreMenu, setShowMoreMenu] = useState(false);
   const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
   const [visibleColumns, setVisibleColumns] = useState<MetricColumn[]>([
     'impressions', 
@@ -54,25 +65,34 @@ export const CampaignsPage: React.FC = () => {
     'conversions', 
     'cost'
   ]);
-  
-  const [activeFilters, setActiveFilters] = useState<{
-    campaignStatus: CampaignStatus[];
-    campaignType: CampaignType[];
-    minBudget?: number;
-    maxBudget?: number;
-  }>({
-    campaignStatus: [],
-    campaignType: []
-  });
 
-  // Get time series data for selected campaign or first campaign
+  // Get time series data using existing hook
   const activeCampaignId = selectedCampaignId || (campaigns.length > 0 ? campaigns[0]?.id : null);
   const { data: timeSeriesData, loading: chartLoading } = useCampaignTimeSeries(
     activeCampaignId,
     dateRange
   );
 
-  // Date range presets
+  // Close dropdown menus when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (!target.closest('.relative')) {
+        setShowReportsMenu(false);
+        setShowMoreMenu(false);
+      }
+    };
+
+    if (showReportsMenu || showMoreMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showReportsMenu, showMoreMenu]);
+
+  // Date range presets for dropdown
   const dateRangePresets = [
     { text: 'Today', value: 'today' },
     { text: 'Yesterday', value: 'yesterday' },
@@ -88,35 +108,51 @@ export const CampaignsPage: React.FC = () => {
   const filteredCampaigns = useMemo(() => {
     let filtered = [...campaigns];
 
-    // Text search
-    if (searchText.trim()) {
-      const search = searchText.toLowerCase().trim();
+    // TOP SEARCH BAR - Search campaign NAMES only (and page names if you add them)
+    if (topSearchText.trim()) {
+      const search = topSearchText.toLowerCase().trim();
       filtered = filtered.filter(c => 
-        c.name.toLowerCase().includes(search) ||
-        c.id.toLowerCase().includes(search)
+        c.name.toLowerCase().includes(search)
+        // Add page name search here if you have page field: || c.pageName.toLowerCase().includes(search)
       );
     }
 
-    // Status filter
-    if (activeFilters.campaignStatus.length > 0) {
+    // TABLE KEYWORD SEARCH - Searches EVERYTHING in the table!
+    if (tableSearchText.trim()) {
+      const search = tableSearchText.toLowerCase().trim();
+      filtered = filtered.filter(c => {
+        // Search in: name, ID, status, type, budget, and any other visible field
+        return (
+          c.name.toLowerCase().includes(search) ||
+          c.id.toLowerCase().includes(search) ||
+          c.status.toLowerCase().includes(search) ||
+          c.type.toLowerCase().includes(search) ||
+          c.budget.amount.toString().includes(search) ||
+          c.budget.format().toLowerCase().includes(search)
+        );
+      });
+    }
+
+    // Status filter (local)
+    if (localFilters.campaignStatus.length > 0) {
       filtered = filtered.filter(c => 
-        activeFilters.campaignStatus.includes(c.status)
+        localFilters.campaignStatus.includes(c.status)
       );
     }
 
-    // Type filter
-    if (activeFilters.campaignType.length > 0) {
+    // Type filter (local)
+    if (localFilters.campaignType.length > 0) {
       filtered = filtered.filter(c => 
-        activeFilters.campaignType.includes(c.type)
+        localFilters.campaignType.includes(c.type)
       );
     }
 
-    // Budget filter
-    if (activeFilters.minBudget !== undefined) {
-      filtered = filtered.filter(c => c.budget.amount >= activeFilters.minBudget!);
+    // Budget filter (local only)
+    if (localFilters.minBudget !== undefined) {
+      filtered = filtered.filter(c => c.budget.amount >= localFilters.minBudget!);
     }
-    if (activeFilters.maxBudget !== undefined) {
-      filtered = filtered.filter(c => c.budget.amount <= activeFilters.maxBudget!);
+    if (localFilters.maxBudget !== undefined) {
+      filtered = filtered.filter(c => c.budget.amount <= localFilters.maxBudget!);
     }
 
     // Sorting
@@ -153,7 +189,7 @@ export const CampaignsPage: React.FC = () => {
     }
 
     return filtered;
-  }, [campaigns, searchText, activeFilters, sortConfig]);
+  }, [campaigns, topSearchText, tableSearchText, localFilters, sortConfig]);
 
   // Calculate aggregated metrics
   const aggregatedMetrics = useMemo(() => {
@@ -191,7 +227,7 @@ export const CampaignsPage: React.FC = () => {
   }, [timeSeriesData]);
 
   // Generate ad group sub-rows
-  const getCampaignSubRows = (campaign: Campaign): AdGroupRow[] => {
+  const getCampaignSubRows = (campaign: CampaignUI): AdGroupRow[] => {
     const baseImpressions = Math.floor(Math.random() * 2000) + 500;
     const baseClicks = Math.floor(Math.random() * 100) + 20;
     
@@ -229,7 +265,7 @@ export const CampaignsPage: React.FC = () => {
     ];
   };
 
-  // Handlers
+  // Event Handlers
   const toggleRowExpansion = (campaignId: string) => {
     setExpandedRows(prev => {
       const newSet = new Set(prev);
@@ -274,31 +310,42 @@ export const CampaignsPage: React.FC = () => {
     });
   };
 
-  const handleSearchChange = (e: any) => {
-    setSearchText(e.value || '');
+  const handleTopSearchChange = (e: any) => {
+    const value = e.value || '';
+    setTopSearchText(value);
   };
 
+  const handleTableSearchChange = (e: any) => {
+    const value = e.value || '';
+    setTableSearchText(value);
+  };
+
+  // Apply filters
   const applyFilters = () => {
-    const newFilters: CampaignFilters = {};
+    const newBackendFilters: any = {};
     
-    if (activeFilters.campaignStatus.length > 0) {
-      newFilters.status = activeFilters.campaignStatus;
+    if (localFilters.campaignStatus.length > 0) {
+      newBackendFilters.status = localFilters.campaignStatus;
     }
     
-    if (activeFilters.campaignType.length > 0) {
-      newFilters.type = activeFilters.campaignType;
+    if (localFilters.campaignType.length > 0) {
+      newBackendFilters.type = localFilters.campaignType;
     }
     
-    updateFilters(newFilters);
+    setBackendFilters(newBackendFilters);
+    updateFilters(newBackendFilters);
     setShowFilterDialog(false);
   };
 
+  // Clear all filters
   const clearAllFilters = () => {
-    setActiveFilters({
+    setLocalFilters({
       campaignStatus: [],
       campaignType: []
     });
-    setSearchText('');
+    setTopSearchText('');
+    setTableSearchText('');
+    setBackendFilters({});
     updateFilters({});
   };
 
@@ -348,12 +395,50 @@ export const CampaignsPage: React.FC = () => {
     }
   };
 
+  const handleReportsClick = () => {
+    setShowReportsMenu(!showReportsMenu);
+  };
+
+  const handleMoreClick = () => {
+    setShowMoreMenu(!showMoreMenu);
+  };
+
+  const handleGenerateReport = (reportType: string) => {
+    console.log('Generating report:', reportType);
+    alert(`Generating ${reportType} report...`);
+    setShowReportsMenu(false);
+  };
+
+  const handleMoreAction = (action: string) => {
+    console.log('More action:', action);
+    alert(`Action: ${action}`);
+    setShowMoreMenu(false);
+  };
+
+  const handleTableSearchIconClick = () => {
+    setShowTableSearchDialog(true);
+  };
+
+  const removeFilter = (filterType: 'status' | 'type', value: string) => {
+    if (filterType === 'status') {
+      setLocalFilters(prev => ({
+        ...prev,
+        campaignStatus: prev.campaignStatus.filter(s => s !== value)
+      }));
+    } else if (filterType === 'type') {
+      setLocalFilters(prev => ({
+        ...prev,
+        campaignType: prev.campaignType.filter(t => t !== value)
+      }));
+    }
+  };
+
   // Active filter count
   const activeFilterCount = 
-    activeFilters.campaignStatus.length +
-    activeFilters.campaignType.length +
-    (activeFilters.minBudget !== undefined ? 1 : 0) +
-    (activeFilters.maxBudget !== undefined ? 1 : 0);
+    localFilters.campaignStatus.length +
+    localFilters.campaignType.length +
+    (localFilters.minBudget !== undefined ? 1 : 0) +
+    (localFilters.maxBudget !== undefined ? 1 : 0);
 
   if (loading) {
     return (
@@ -373,60 +458,146 @@ export const CampaignsPage: React.FC = () => {
 
   return (
     <div className="bg-white min-h-screen">
-      {/* Top Navigation Bar */}
-      <div className="border-b border-gray-200 bg-white px-6 py-3">
-        <div className="flex items-center gap-4 flex-wrap">
+      {/* ============================================ */}
+      {/* TOP BAR - Search + Navigation (Google Ads Style) */}
+      {/* ============================================ */}
+      <div className="border-b border-gray-200 bg-white">
+        <div className="px-4 py-2 flex items-center justify-between gap-4">
+          {/* Left: Search Bar - SEARCHES CAMPAIGN NAMES ONLY */}
+          <div className="flex-1 max-w-xs">
+            <TextBoxComponent
+              placeholder="Search for a page or campaign"
+              showClearButton={true}
+              value={topSearchText}
+              input={handleTopSearchChange}
+              change={handleTopSearchChange}
+              cssClass="w-full"
+            />
+          </div>
+
+          {/* Right: User actions */}
+          <div className="flex items-center gap-3">
+            <ButtonComponent iconCss="e-icons e-appearance" cssClass="e-flat e-small" title="Appearance" />
+            <ButtonComponent iconCss="e-icons e-refresh" cssClass="e-flat e-small" title="Refresh" onClick={refetch} />
+            <ButtonComponent iconCss="e-icons e-help" cssClass="e-flat e-small" title="Help" />
+            <div className="relative">
+              <ButtonComponent iconCss="e-icons e-notification" cssClass="e-flat e-small" title="Notifications">
+                <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
+              </ButtonComponent>
+            </div>
+            <span className="text-xs text-gray-600">237-721-4676 Mockito</span>
+            <div className="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center text-sm">
+              A
+            </div>
+          </div>
+        </div>
+
+        {/* Navigation Bar with Dropdowns */}
+        <div className="px-4 py-2 flex items-center gap-3 border-t border-gray-100">
           <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-600">Back to</span>
-            <ButtonComponent cssClass="e-flat e-small">All campaigns</ButtonComponent>
+            <span className="text-xs text-gray-600">Back to</span>
+            <DropDownListComponent
+              dataSource={[{ text: 'All campaigns', value: 'all' }]}
+              fields={{ text: 'text', value: 'value' }}
+              value="all"
+              cssClass="w-32"
+            />
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-600">View ({activeFilterCount} filter{activeFilterCount !== 1 ? 's' : ''})</span>
+            <span className="text-xs text-gray-600">View ({activeFilterCount} filter{activeFilterCount !== 1 ? 's' : ''})</span>
             <DropDownListComponent
               dataSource={[{ text: 'Search campaigns', value: 'search' }]}
               fields={{ text: 'text', value: 'value' }}
               value="search"
-              cssClass="w-48"
+              cssClass="w-40"
             />
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-600">Campaigns ({filteredCampaigns.length})</span>
+            <span className="text-xs text-gray-600">Campaigns ({filteredCampaigns.length})</span>
             <DropDownListComponent
               dataSource={filteredCampaigns.map(c => ({ text: c.name, value: c.id }))}
               fields={{ text: 'text', value: 'value' }}
               placeholder="Select a campaign"
               change={(e) => setSelectedCampaignId(e.value)}
               value={selectedCampaignId}
-              cssClass="w-60"
+              cssClass="w-48"
             />
           </div>
         </div>
       </div>
 
-      {/* Filters Summary Bar */}
-      <div className="border-b border-gray-200 bg-gray-50 px-6 py-2">
-        <div className="flex items-center gap-4 text-xs text-gray-600 flex-wrap">
-          <span className="font-medium">Filters</span>
-          <span>Campaign status: {activeFilters.campaignStatus.length > 0 ? activeFilters.campaignStatus.join(', ') : 'All'}</span>
-          <span>Ad group status: Enabled, Paused</span>
-          <span>Campaign type: {activeFilters.campaignType.length > 0 ? activeFilters.campaignType.join(', ') : 'All'}</span>
-          <ButtonComponent cssClass="e-link e-small" onClick={() => setShowFilterDialog(true)}>
+      {/* ============================================ */}
+      {/* FILTER CHIPS BAR (Google Ads Style) */}
+      {/* ============================================ */}
+      <div className="bg-gray-50 border-b border-gray-200 px-4 py-2">
+        <div className="flex items-center gap-3 text-xs flex-wrap">
+          <span className="text-gray-700 font-medium">Filters</span>
+          
+          {/* Campaign Status Filter */}
+          <div className="flex items-center gap-2">
+            <span className="text-gray-600">Campaign status:</span>
+            {localFilters.campaignStatus.length > 0 ? (
+              localFilters.campaignStatus.map(status => (
+                <span key={status} className="inline-flex items-center gap-1 px-2 py-1 bg-white border border-gray-300 rounded text-gray-700">
+                  {status}
+                  <button 
+                    onClick={() => removeFilter('status', status)}
+                    className="text-gray-400 hover:text-gray-600"
+                  >
+                    ×
+                  </button>
+                </span>
+              ))
+            ) : (
+              <span className="text-gray-600">All</span>
+            )}
+          </div>
+
+          {/* Ad Group Status (static for now) */}
+          <div className="flex items-center gap-2">
+            <span className="text-gray-600">Ad group status:</span>
+            <span className="text-gray-600">Enabled, Paused</span>
+          </div>
+
+          {/* Campaign Type Filter */}
+          <div className="flex items-center gap-2">
+            <span className="text-gray-600">Campaign type:</span>
+            {localFilters.campaignType.length > 0 ? (
+              localFilters.campaignType.map(type => (
+                <span key={type} className="inline-flex items-center gap-1 px-2 py-1 bg-white border border-gray-300 rounded text-gray-700">
+                  {type}
+                  <button 
+                    onClick={() => removeFilter('type', type)}
+                    className="text-gray-400 hover:text-gray-600"
+                  >
+                    ×
+                  </button>
+                </span>
+              ))
+            ) : (
+              <span className="text-gray-600">Search</span>
+            )}
+          </div>
+
+          <ButtonComponent 
+            cssClass="e-link e-small text-blue-600"
+            onClick={() => setShowFilterDialog(true)}
+          >
             Add filter
           </ButtonComponent>
-          {activeFilterCount > 0 && (
-            <ButtonComponent cssClass="e-link e-small" onClick={clearAllFilters}>
-              Clear all filters
-            </ButtonComponent>
-          )}
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="px-6 py-4">
-        {/* Header with Title and Date Range */}
-        <div className="flex items-center justify-between mb-4 flex-wrap gap-4">
+      {/* ============================================ */}
+      {/* MAIN CONTENT AREA */}
+      {/* ============================================ */}
+      <div className="px-4 py-4">
+        {/* Page Title and Date Range */}
+        <div className="flex items-center justify-between mb-3">
           <h1 className="text-2xl font-normal text-gray-900">Campaigns</h1>
-          <div className="flex items-center gap-3 flex-wrap">
+          
+          {/* Date Range Selector (Google Ads Style) */}
+          <div className="flex items-center gap-2">
             <span className="text-sm text-gray-600">{formatDisplay()}</span>
             <DropDownListComponent
               dataSource={dateRangePresets}
@@ -434,11 +605,11 @@ export const CampaignsPage: React.FC = () => {
               value={preset}
               change={(e) => setPreset(e.value as any)}
               placeholder="Select date range"
-              cssClass="w-56"
+              cssClass="w-44"
             />
             <ButtonComponent iconCss="e-icons e-chevron-left" cssClass="e-flat e-small" />
             <ButtonComponent iconCss="e-icons e-chevron-right" cssClass="e-flat e-small" />
-            <ButtonComponent cssClass="e-link e-small" onClick={() => setPreset('last30days')}>
+            <ButtonComponent cssClass="e-link e-small text-blue-600">
               Show last 30 days
             </ButtonComponent>
           </div>
@@ -446,98 +617,78 @@ export const CampaignsPage: React.FC = () => {
 
         {/* Tabs */}
         <div className="flex gap-6 border-b border-gray-200 mb-4">
-          <button className="pb-3 border-b-2 border-blue-600 text-blue-600 font-medium text-sm">
+          <button className="pb-2 border-b-2 border-blue-600 text-blue-600 font-medium text-sm">
             Campaigns
           </button>
-          <button className="pb-3 text-gray-600 text-sm hover:text-gray-900">
+          <button className="pb-2 text-gray-600 text-sm hover:text-gray-900">
             Drafts
           </button>
-          <button className="pb-3 text-gray-600 text-sm hover:text-gray-900">
+          <button className="pb-2 text-gray-600 text-sm hover:text-gray-900">
             Settings
           </button>
         </div>
 
-        {/* Metrics Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <div className="bg-blue-500 rounded-lg p-4 text-white">
+        {/* ============================================ */}
+        {/* METRICS CARDS */}
+        {/* ============================================ */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+          <div className="bg-blue-500 rounded p-4 text-white">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-normal">Impr.</span>
+              <span className="text-xs font-medium">Impr.</span>
               <ButtonComponent iconCss="e-icons e-more-vert" cssClass="e-flat e-small text-white" />
             </div>
-            <div className="text-3xl font-normal mb-1">
+            <div className="text-2xl font-normal mb-1">
               {aggregatedMetrics.totalImpressions.toLocaleString()}
             </div>
-            <div className="flex items-center gap-1 text-sm">
-              <span>↓ {Math.abs(Math.floor(aggregatedMetrics.totalImpressions * 0.416)).toLocaleString()}</span>
+            <div className="flex items-center gap-1 text-xs">
+              <span className="text-red-300">↓ {Math.abs(Math.floor(aggregatedMetrics.totalImpressions * 0.416)).toLocaleString()}</span>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg p-4 border border-gray-300">
+          <div className="bg-white rounded p-4 border border-gray-300">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm text-gray-700">Cost</span>
+              <span className="text-xs text-gray-700">Cost</span>
               <ButtonComponent iconCss="e-icons e-more-vert" cssClass="e-flat e-small" />
             </div>
-            <div className="text-3xl font-normal text-gray-900 mb-1">
+            <div className="text-2xl font-normal text-gray-900 mb-1">
               ₹{aggregatedMetrics.totalCost.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </div>
-            <div className="flex items-center gap-1 text-sm text-green-600">
+            <div className="flex items-center gap-1 text-xs text-green-600">
               <span>↑ ₹{(aggregatedMetrics.totalCost * 0.0103).toFixed(2)}</span>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg p-4 border border-gray-300">
+          <div className="bg-white rounded p-4 border border-gray-300">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm text-gray-700">Conversions</span>
+              <span className="text-xs text-gray-700">Conversions</span>
               <ButtonComponent iconCss="e-icons e-more-vert" cssClass="e-flat e-small" />
             </div>
-            <div className="text-3xl font-normal text-gray-900 mb-1">
+            <div className="text-2xl font-normal text-gray-900 mb-1">
               {aggregatedMetrics.totalConversions.toFixed(2)}
             </div>
-            <div className="flex items-center gap-1 text-sm text-red-600">
+            <div className="flex items-center gap-1 text-xs text-red-600">
               <span>↓ {(aggregatedMetrics.totalConversions * 0.643).toFixed(2)}</span>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg p-4 border border-gray-300">
+          <div className="bg-white rounded p-4 border border-gray-300">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm text-gray-700">Avg. target CPA</span>
+              <span className="text-xs text-gray-700">Avg. target CPA</span>
               <ButtonComponent iconCss="e-icons e-more-vert" cssClass="e-flat e-small" />
             </div>
-            <div className="text-3xl font-normal text-gray-900 mb-1">
+            <div className="text-2xl font-normal text-gray-900 mb-1">
               ₹{aggregatedMetrics.avgCpa.toFixed(2)}
             </div>
-            <div className="flex items-center gap-1 text-sm text-green-600">
+            <div className="flex items-center gap-1 text-xs text-green-600">
               <span>↑ ₹{(aggregatedMetrics.avgCpa * 0.0).toFixed(2)}</span>
             </div>
           </div>
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex items-center gap-2 mb-4 flex-wrap">
-          <ButtonComponent iconCss="e-icons e-chart" cssClass="e-flat e-small" onClick={() => setShowColumnDialog(true)}>
-            Metrics
-          </ButtonComponent>
-          <ButtonComponent 
-            iconCss="e-icons e-edit" 
-            cssClass="e-flat e-small"
-            disabled={selectedRows.size === 0}
-          >
-            Adjust
-          </ButtonComponent>
-          <ButtonComponent iconCss="e-icons e-download" cssClass="e-flat e-small" onClick={downloadReport}>
-            Download
-          </ButtonComponent>
-          <ButtonComponent 
-            iconCss="e-icons e-expand" 
-            cssClass="e-flat e-small"
-            onClick={expandCollapseAll}
-          >
-            {expandedRows.size === filteredCampaigns.length && filteredCampaigns.length > 0 ? 'Collapse all' : 'Expand all'}
-          </ButtonComponent>
-        </div>
-
-        {/* Chart Section */}
-        <div className="bg-white border border-gray-200 rounded mb-6 p-4">
+        {/* ============================================ */}
+        {/* CHART SECTION */}
+        {/* ============================================ */}
+        <div className="bg-white border border-gray-200 rounded mb-4">
           {chartLoading ? (
             <div className="h-64 flex items-center justify-center text-gray-400">
               Loading chart data...
@@ -553,9 +704,10 @@ export const CampaignsPage: React.FC = () => {
               }}
               primaryYAxis={{
                 labelFormat: '{value}',
-                majorGridLines: { width: 1, color: '#e5e7eb' }
+                majorGridLines: { width: 1, color: '#e5e7eb' },
+                minimum: 0
               }}
-              height="300px"
+              height="280px"
               chartArea={{ border: { width: 0 } }}
               background="transparent"
               legendSettings={{ visible: true, position: 'Bottom' }}
@@ -602,27 +754,30 @@ export const CampaignsPage: React.FC = () => {
           )}
         </div>
 
-        {/* Search and Actions Bar */}
-        <div className="flex items-center justify-between mb-4 flex-wrap gap-4">
-          <div className="flex items-center gap-4">
+
+        {/* ============================================ */}
+        {/* TABLE TOOLBAR - Above Table (Google Ads Style) */}
+        {/* ============================================ */}
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
             <ButtonComponent 
               iconCss="e-icons e-filter" 
-              cssClass="e-flat e-small" 
+              cssClass="e-flat e-small"
               onClick={() => setShowFilterDialog(true)}
             >
               Add filter
             </ButtonComponent>
-            <TextBoxComponent
-              placeholder="Search campaigns..."
-              showClearButton={true}
-              value={searchText}
-              input={handleSearchChange}
-              cssClass="w-80"
-            />
           </div>
-          <div className="flex items-center gap-2 flex-wrap">
-            <ButtonComponent iconCss="e-icons e-search" cssClass="e-flat e-small">
-              Search
+
+          <div className="flex items-center gap-2 relative">
+            {/* TABLE SEARCH ICON - Opens dialog for keyword search */}
+            <ButtonComponent 
+              iconCss="e-icons e-search" 
+              cssClass="e-flat e-small" 
+              onClick={handleTableSearchIconClick}
+              title="Search table (all fields)"
+            >
+              {tableSearchText && <span className="ml-1 text-blue-600">●</span>}
             </ButtonComponent>
             <ButtonComponent 
               iconCss="e-icons e-list-view" 
@@ -638,24 +793,132 @@ export const CampaignsPage: React.FC = () => {
             >
               Columns
             </ButtonComponent>
-            <ButtonComponent iconCss="e-icons e-print" cssClass="e-flat e-small">
-              Reports
-            </ButtonComponent>
+            
+            {/* Reports Dropdown */}
+            <div className="relative">
+              <ButtonComponent 
+                iconCss="e-icons e-print" 
+                cssClass="e-flat e-small"
+                onClick={handleReportsClick}
+              >
+                Reports
+              </ButtonComponent>
+              {showReportsMenu && (
+                <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded shadow-lg z-50 w-56">
+                  <button 
+                    onClick={() => handleGenerateReport('Performance Report')}
+                    className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                  >
+                    Performance Report
+                  </button>
+                  <button 
+                    onClick={() => handleGenerateReport('Campaign Report')}
+                    className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                  >
+                    Campaign Report
+                  </button>
+                  <button 
+                    onClick={() => handleGenerateReport('Ad Group Report')}
+                    className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                  >
+                    Ad Group Report
+                  </button>
+                  <button 
+                    onClick={() => handleGenerateReport('Keyword Report')}
+                    className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                  >
+                    Keyword Report
+                  </button>
+                  <div className="border-t border-gray-200 my-1"></div>
+                  <button 
+                    onClick={() => handleGenerateReport('Custom Report')}
+                    className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                  >
+                    Create Custom Report
+                  </button>
+                </div>
+              )}
+            </div>
+
             <ButtonComponent iconCss="e-icons e-download" cssClass="e-flat e-small" onClick={downloadReport}>
               Download
             </ButtonComponent>
             <ButtonComponent iconCss="e-icons e-expand" cssClass="e-flat e-small" onClick={expandCollapseAll}>
               Expand
             </ButtonComponent>
-            <ButtonComponent iconCss="e-icons e-more-vert" cssClass="e-flat e-small">
-              More
-            </ButtonComponent>
+            
+            {/* More Dropdown */}
+            <div className="relative">
+              <ButtonComponent 
+                iconCss="e-icons e-more-vert" 
+                cssClass="e-flat e-small"
+                onClick={handleMoreClick}
+              >
+                More
+              </ButtonComponent>
+              {showMoreMenu && (
+                <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded shadow-lg z-50 w-48">
+                  <button 
+                    onClick={() => handleMoreAction('Export to Excel')}
+                    className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                  >
+                    Export to Excel
+                  </button>
+                  <button 
+                    onClick={() => handleMoreAction('Export to CSV')}
+                    className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                  >
+                    Export to CSV
+                  </button>
+                  <button 
+                    onClick={() => handleMoreAction('Print View')}
+                    className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                  >
+                    Print View
+                  </button>
+                  <div className="border-t border-gray-200 my-1"></div>
+                  <button 
+                    onClick={() => handleMoreAction('Schedule Report')}
+                    className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                  >
+                    Schedule Report
+                  </button>
+                  <button 
+                    onClick={() => handleMoreAction('Save View')}
+                    className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                  >
+                    Save View
+                  </button>
+                  <button 
+                    onClick={() => handleMoreAction('Share')}
+                    className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                  >
+                    Share
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
+        {/* Active Table Search Indicator */}
+        {tableSearchText && (
+          <div className="bg-blue-50 border border-blue-200 rounded p-2 mb-3 flex items-center justify-between text-sm">
+            <span className="text-blue-900">
+              🔍 Searching for: <strong>{tableSearchText}</strong>
+            </span>
+            <button 
+              onClick={() => setTableSearchText('')}
+              className="text-blue-600 hover:text-blue-800 font-medium"
+            >
+              Clear search
+            </button>
+          </div>
+        )}
+
         {/* Bulk Actions Bar */}
         {selectedRows.size > 0 && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4 flex items-center justify-between flex-wrap gap-3">
+          <div className="bg-blue-50 border border-blue-200 rounded p-3 mb-3 flex items-center justify-between">
             <span className="text-sm text-blue-900 font-medium">
               {selectedRows.size} campaign{selectedRows.size !== 1 ? 's' : ''} selected
             </span>
@@ -688,12 +951,14 @@ export const CampaignsPage: React.FC = () => {
           </div>
         )}
 
-        {/* Campaign Table */}
+        {/* ============================================ */}
+        {/* DATA TABLE */}
+        {/* ============================================ */}
         <div className="bg-white border border-gray-200 rounded overflow-x-auto">
-          <table className="w-full text-sm min-w-[1200px]">
+          <table className="w-full text-xs min-w-[1400px]">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
-                <th className="px-4 py-3 text-left w-10">
+                <th className="px-3 py-2 text-left w-8">
                   <input 
                     type="checkbox" 
                     className="rounded border-gray-300 cursor-pointer"
@@ -701,66 +966,76 @@ export const CampaignsPage: React.FC = () => {
                     onChange={toggleSelectAll}
                   />
                 </th>
-                <th className="px-4 py-3 text-left w-10"></th>
+                <th className="px-3 py-2 text-left w-8"></th>
                 <th 
-                  className="px-4 py-3 text-left font-normal text-gray-700 cursor-pointer hover:bg-gray-100" 
+                  className="px-3 py-2 text-left font-medium text-gray-700 cursor-pointer hover:bg-gray-100" 
                   onClick={() => handleSort('name')}
                 >
                   Campaign {sortConfig?.key === 'name' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
                 </th>
                 <th 
-                  className="px-4 py-3 text-left font-normal text-gray-700 cursor-pointer hover:bg-gray-100" 
+                  className="px-3 py-2 text-left font-medium text-gray-700 cursor-pointer hover:bg-gray-100" 
                   onClick={() => handleSort('budget')}
                 >
                   Budget {sortConfig?.key === 'budget' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
                 </th>
                 <th 
-                  className="px-4 py-3 text-left font-normal text-gray-700 cursor-pointer hover:bg-gray-100" 
+                  className="px-3 py-2 text-left font-medium text-gray-700 cursor-pointer hover:bg-gray-100" 
                   onClick={() => handleSort('status')}
                 >
                   Status {sortConfig?.key === 'status' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
                 </th>
-                <th className="px-4 py-3 text-left font-normal text-gray-700">Optimization score</th>
+                <th className="px-3 py-2 text-center font-medium text-gray-700">
+                  Optimization<br/>score
+                </th>
                 <th 
-                  className="px-4 py-3 text-left font-normal text-gray-700 cursor-pointer hover:bg-gray-100" 
+                  className="px-3 py-2 text-left font-medium text-gray-700 cursor-pointer hover:bg-gray-100" 
                   onClick={() => handleSort('type')}
                 >
-                  Campaign type {sortConfig?.key === 'type' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+                  Campaign<br/>type {sortConfig?.key === 'type' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
                 </th>
                 {visibleColumns.includes('impressions') && (
-                  <th className="px-4 py-3 text-right font-normal text-gray-700">Impr.</th>
+                  <th className="px-3 py-2 text-right font-medium text-gray-700">Impr.</th>
                 )}
                 {visibleColumns.includes('clicks') && (
-                  <th className="px-4 py-3 text-right font-normal text-gray-700">↓ Interactions</th>
+                  <th className="px-3 py-2 text-right font-medium text-gray-700">
+                    ↓ Interactions
+                  </th>
                 )}
-                <th className="px-4 py-3 text-right font-normal text-gray-700">Interaction rate</th>
+                <th className="px-3 py-2 text-right font-medium text-gray-700">
+                  Interaction<br/>rate
+                </th>
                 {visibleColumns.includes('avgCost') && (
-                  <th className="px-4 py-3 text-right font-normal text-gray-700">Avg. cost</th>
+                  <th className="px-3 py-2 text-right font-medium text-gray-700">Avg. cost</th>
                 )}
                 {visibleColumns.includes('cost') && (
-                  <th className="px-4 py-3 text-right font-normal text-gray-700">Cost</th>
+                  <th className="px-3 py-2 text-right font-medium text-gray-700">Cost</th>
                 )}
                 {visibleColumns.includes('conversions') && (
-                  <th className="px-4 py-3 text-left font-normal text-gray-700">Conv. rate</th>
+                  <th className="px-3 py-2 text-left font-medium text-gray-700">Conv. rate</th>
                 )}
-                <th className="px-4 py-3 text-left font-normal text-gray-700">Bid strategy</th>
+                <th className="px-3 py-2 text-left font-medium text-gray-700">
+                  Bid strategy<br/>type
+                </th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="bg-white">
               {/* Drafts Row */}
-              <tr className="border-b border-gray-200 hover:bg-gray-50">
-                <td className="px-4 py-3"></td>
-                <td className="px-4 py-3">
+              <tr className="border-b border-gray-100 hover:bg-gray-50">
+                <td className="px-3 py-2">
+                  <span className="inline-block w-2 h-2 rounded-full bg-gray-400"></span>
+                </td>
+                <td className="px-3 py-2">
                   <button 
                     onClick={() => toggleRowExpansion('drafts')}
-                    className="text-gray-600 hover:text-gray-900"
+                    className="text-gray-500 hover:text-gray-700"
                   >
                     {expandedRows.has('drafts') ? '▼' : '▶'}
                   </button>
                 </td>
-                <td className="px-4 py-3" colSpan={14}>
+                <td className="px-3 py-2" colSpan={13}>
                   <div className="flex items-center gap-2">
-                    <span className="px-2 py-1 bg-gray-200 rounded text-xs">📄</span>
+                    <span className="px-2 py-0.5 bg-gray-200 rounded text-xs">📄</span>
                     <span className="text-gray-700">Drafts in progress: 0</span>
                   </div>
                 </td>
@@ -769,11 +1044,11 @@ export const CampaignsPage: React.FC = () => {
               {/* Campaign Rows */}
               {filteredCampaigns.length === 0 ? (
                 <tr>
-                  <td colSpan={15} className="px-4 py-12 text-center">
+                  <td colSpan={15} className="px-3 py-8 text-center">
                     <div className="text-gray-500">
-                      <p className="text-lg mb-2">No campaigns found</p>
-                      {searchText && (
-                        <p className="text-sm">Try adjusting your search or filters</p>
+                      <p className="text-base mb-1">No campaigns found</p>
+                      {(topSearchText || tableSearchText || activeFilterCount > 0) && (
+                        <p className="text-xs">Try adjusting your search or filters</p>
                       )}
                     </div>
                   </td>
@@ -785,8 +1060,8 @@ export const CampaignsPage: React.FC = () => {
                   
                   return (
                     <React.Fragment key={campaign.id}>
-                      <tr className="border-b border-gray-200 hover:bg-gray-50">
-                        <td className="px-4 py-3">
+                      <tr className="border-b border-gray-100 hover:bg-gray-50">
+                        <td className="px-3 py-2">
                           <input 
                             type="checkbox" 
                             className="rounded border-gray-300 cursor-pointer"
@@ -794,117 +1069,122 @@ export const CampaignsPage: React.FC = () => {
                             onChange={() => toggleRowSelection(campaign.id)}
                           />
                         </td>
-                        <td className="px-4 py-3">
+                        <td className="px-3 py-2">
                           <button 
                             onClick={() => toggleRowExpansion(campaign.id)}
-                            className="text-gray-600 hover:text-gray-900"
+                            className="text-gray-500 hover:text-gray-700"
                           >
                             {isExpanded ? '▼' : '▶'}
                           </button>
                         </td>
-                        <td className="px-4 py-3">
+                        <td className="px-3 py-2">
                           <div className="flex items-center gap-2">
                             <span className={`w-2 h-2 rounded-full flex-shrink-0 ${
-                              campaign.status === CampaignStatus.ENABLED ? 'bg-green-500' : 
-                              campaign.status === CampaignStatus.PAUSED ? 'bg-yellow-500' : 'bg-red-500'
+                              campaign.status === CampaignStatusUI.ENABLED ? 'bg-green-500' : 
+                              campaign.status === CampaignStatusUI.PAUSED ? 'bg-yellow-500' : 'bg-red-500'
                             }`}></span>
                             <a href="#" className="text-blue-600 hover:underline">
                               {campaign.name}
                             </a>
                           </div>
                         </td>
-                        <td className="px-4 py-3">
+                        <td className="px-3 py-2">
                           <div className="flex items-center gap-1">
                             <span>{campaign.budget.format()}/day</span>
-                            <span className="text-gray-400 cursor-pointer hover:text-gray-600">✏️</span>
+                            <button className="text-gray-400 hover:text-gray-600 text-xs">✏️</button>
                           </div>
                         </td>
-                        <td className="px-4 py-3">
-                          <span className={`px-2 py-1 rounded text-xs whitespace-nowrap ${
-                            campaign.status === CampaignStatus.ENABLED 
-                              ? 'bg-red-100 text-red-800'
-                              : campaign.status === CampaignStatus.PAUSED
-                              ? 'bg-yellow-100 text-yellow-800'
-                              : 'bg-gray-100 text-gray-800'
+                        <td className="px-3 py-2">
+                          <span className={`px-2 py-0.5 rounded text-xs whitespace-nowrap inline-flex items-center gap-1 ${
+                            campaign.status === CampaignStatusUI.ENABLED 
+                              ? 'bg-red-50 text-red-700 border border-red-200'
+                              : campaign.status === CampaignStatusUI.PAUSED
+                              ? 'bg-yellow-50 text-yellow-700 border border-yellow-200'
+                              : 'bg-gray-50 text-gray-700 border border-gray-200'
                           }`}>
-                            {campaign.status === CampaignStatus.ENABLED ? '⚠️ Limited by budget' : campaign.status}
+                            {campaign.status === CampaignStatusUI.ENABLED && '⚠️'}
+                            {campaign.status === CampaignStatusUI.ENABLED ? 'Limited by budget' : campaign.status}
                           </span>
                         </td>
-                        <td className="px-4 py-3">
-                          <span className="text-blue-600 cursor-pointer hover:underline">58.9%</span>
+                        <td className="px-3 py-2 text-center">
+                          <a href="#" className="text-blue-600 hover:underline">58.9%</a>
                         </td>
-                        <td className="px-4 py-3">
+                        <td className="px-3 py-2">
                           <span className="text-gray-700">{campaign.type}</span>
                         </td>
                         {visibleColumns.includes('impressions') && (
-                          <td className="px-4 py-3 text-right">
+                          <td className="px-3 py-2 text-right">
                             {subRows.reduce((sum, row) => sum + row.impressions, 0).toLocaleString()}
                           </td>
                         )}
                         {visibleColumns.includes('clicks') && (
-                          <td className="px-4 py-3 text-right">
-                            {subRows.reduce((sum, row) => sum + row.clicks, 0)} clicks
+                          <td className="px-3 py-2 text-right">
+                            <span className="text-gray-700">{subRows.reduce((sum, row) => sum + row.clicks, 0)}</span>
+                            <span className="text-gray-500 ml-1">clicks</span>
                           </td>
                         )}
-                        <td className="px-4 py-3 text-right">
+                        <td className="px-3 py-2 text-right">
                           {(
                             (subRows.reduce((sum, row) => sum + row.clicks, 0) / 
                             subRows.reduce((sum, row) => sum + row.impressions, 0)) * 100
                           ).toFixed(2)}%
                         </td>
                         {visibleColumns.includes('avgCost') && (
-                          <td className="px-4 py-3 text-right">
+                          <td className="px-3 py-2 text-right">
                             ₹{(
                               subRows.reduce((sum, row) => sum + parseFloat(row.avgCost), 0) / subRows.length
                             ).toFixed(2)}
                           </td>
                         )}
                         {visibleColumns.includes('cost') && (
-                          <td className="px-4 py-3 text-right">
+                          <td className="px-3 py-2 text-right">
                             {campaign.budget.format()}
                           </td>
                         )}
                         {visibleColumns.includes('conversions') && (
-                          <td className="px-4 py-3">
-                            <a href="#" className="text-blue-600 hover:underline text-xs">
+                          <td className="px-3 py-2">
+                            <a href="#" className="text-blue-600 hover:underline">
                               Maximize conversions
                             </a>
                           </td>
                         )}
-                        <td className="px-4 py-3">
-                          <span className="text-xs text-gray-600">Target CPA</span>
+                        <td className="px-3 py-2">
+                          <span className="text-gray-600">Target CPA</span>
                         </td>
                       </tr>
 
-                      {/* Sub-rows */}
+                      {/* Sub-rows (expanded view) */}
                       {isExpanded && subRows.map((subRow, idx) => (
                         <tr key={`${campaign.id}-${idx}`} className="bg-gray-50 border-b border-gray-100">
-                          <td className="px-4 py-2"></td>
-                          <td className="px-4 py-2"></td>
-                          <td className="px-4 py-2 pl-12">
-                            <span className="text-gray-700 text-sm">{subRow.name}</span>
+                          <td className="px-3 py-1.5"></td>
+                          <td className="px-3 py-1.5"></td>
+                          <td className="px-3 py-1.5 pl-8">
+                            <span className="text-gray-700">{subRow.name}</span>
                           </td>
-                          <td className="px-4 py-2"></td>
-                          <td className="px-4 py-2"></td>
-                          <td className="px-4 py-2"></td>
-                          <td className="px-4 py-2"></td>
+                          <td className="px-3 py-1.5"></td>
+                          <td className="px-3 py-1.5"></td>
+                          <td className="px-3 py-1.5"></td>
+                          <td className="px-3 py-1.5"></td>
                           {visibleColumns.includes('impressions') && (
-                            <td className="px-4 py-2 text-right text-sm">{subRow.impressions.toLocaleString()}</td>
+                            <td className="px-3 py-1.5 text-right">{subRow.impressions.toLocaleString()}</td>
                           )}
                           {visibleColumns.includes('clicks') && (
-                            <td className="px-4 py-2 text-right text-sm">{subRow.clicks} clicks</td>
+                            <td className="px-3 py-1.5 text-right">
+                              <span className="text-gray-700">{subRow.clicks}</span>
+                              <span className="text-gray-500 ml-1">clicks</span>
+                            </td>
                           )}
-                          <td className="px-4 py-2 text-right text-sm">{subRow.interactionRate}%</td>
+                          <td className="px-3 py-1.5 text-right">{subRow.interactionRate}%</td>
                           {visibleColumns.includes('avgCost') && (
-                            <td className="px-4 py-2 text-right text-sm">₹{subRow.avgCost}</td>
+                            <td className="px-3 py-1.5 text-right">₹{subRow.avgCost}</td>
                           )}
                           {visibleColumns.includes('cost') && (
-                            <td className="px-4 py-2 text-right text-sm">₹{subRow.cost}</td>
+                            <td className="px-3 py-1.5 text-right">₹{subRow.cost}</td>
                           )}
                           {visibleColumns.includes('conversions') && (
-                            <td className="px-4 py-2 text-sm">{subRow.conversionRate}%</td>
+                            <td className="px-3 py-1.5">{subRow.conversionRate}%</td>
                           )}
-                          <td className="px-4 py-2"></td>
+                          <td className="px-3 py-1.5"></td>
                         </tr>
                       ))}
                     </React.Fragment>
@@ -916,67 +1196,73 @@ export const CampaignsPage: React.FC = () => {
               {filteredCampaigns.length > 0 && (
                 <>
                   <tr className="border-b border-gray-200 bg-gray-50 font-medium">
-                    <td className="px-4 py-3"></td>
-                    <td className="px-4 py-3">
-                      <button className="text-gray-600">▶</button>
+                    <td className="px-3 py-2"></td>
+                    <td className="px-3 py-2">
+                      <button className="text-gray-500">▶</button>
                     </td>
-                    <td className="px-4 py-3" colSpan={5}>
+                    <td className="px-3 py-2" colSpan={5}>
                       <div className="flex items-center gap-2">
                         <span>Total: Campaigns in your current view</span>
-                        <span className="text-gray-400 cursor-pointer" title="Total for filtered campaigns">ℹ️</span>
+                        <span className="text-gray-400 cursor-help" title="Total for filtered campaigns">ℹ️</span>
                       </div>
                     </td>
                     {visibleColumns.includes('impressions') && (
-                      <td className="px-4 py-3 text-right">{aggregatedMetrics.totalImpressions.toLocaleString()}</td>
+                      <td className="px-3 py-2 text-right">{aggregatedMetrics.totalImpressions.toLocaleString()}</td>
                     )}
                     {visibleColumns.includes('clicks') && (
-                      <td className="px-4 py-3 text-right">{aggregatedMetrics.totalClicks} clicks</td>
+                      <td className="px-3 py-2 text-right">
+                        <span className="text-gray-700">{aggregatedMetrics.totalClicks}</span>
+                        <span className="text-gray-500 ml-1">clicks</span>
+                      </td>
                     )}
-                    <td className="px-4 py-3 text-right">{aggregatedMetrics.ctr.toFixed(2)}%</td>
+                    <td className="px-3 py-2 text-right">{aggregatedMetrics.ctr.toFixed(2)}%</td>
                     {visibleColumns.includes('avgCost') && (
-                      <td className="px-4 py-3 text-right">₹{aggregatedMetrics.avgCpc.toFixed(2)}</td>
+                      <td className="px-3 py-2 text-right">₹{aggregatedMetrics.avgCpc.toFixed(2)}</td>
                     )}
                     {visibleColumns.includes('cost') && (
-                      <td className="px-4 py-3 text-right">₹{aggregatedMetrics.totalCost.toFixed(2)}</td>
+                      <td className="px-3 py-2 text-right">₹{aggregatedMetrics.totalCost.toFixed(2)}</td>
                     )}
                     {visibleColumns.includes('conversions') && (
-                      <td className="px-4 py-3">{aggregatedMetrics.conversionRate.toFixed(2)}%</td>
+                      <td className="px-3 py-2">{aggregatedMetrics.conversionRate.toFixed(2)}%</td>
                     )}
-                    <td className="px-4 py-3"></td>
+                    <td className="px-3 py-2"></td>
                   </tr>
 
                   <tr className="bg-gray-50">
-                    <td className="px-4 py-3"></td>
-                    <td className="px-4 py-3">
-                      <button className="text-gray-600">▶</button>
+                    <td className="px-3 py-2"></td>
+                    <td className="px-3 py-2">
+                      <button className="text-gray-500">▶</button>
                     </td>
-                    <td className="px-4 py-3" colSpan={2}>
+                    <td className="px-3 py-2" colSpan={2}>
                       <div className="flex items-center gap-2">
                         <span>Total: Account</span>
-                        <span className="text-gray-400 cursor-pointer" title="Total for entire account">ℹ️</span>
+                        <span className="text-gray-400 cursor-help" title="Total for entire account">ℹ️</span>
                       </div>
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-3 py-2">
                       {campaigns.length > 0 && campaigns[0]?.budget.format()}/day
                     </td>
-                    <td className="px-4 py-3" colSpan={2}>--</td>
+                    <td className="px-3 py-2" colSpan={2}>--</td>
                     {visibleColumns.includes('impressions') && (
-                      <td className="px-4 py-3 text-right">{aggregatedMetrics.totalImpressions.toLocaleString()}</td>
+                      <td className="px-3 py-2 text-right">{aggregatedMetrics.totalImpressions.toLocaleString()}</td>
                     )}
                     {visibleColumns.includes('clicks') && (
-                      <td className="px-4 py-3 text-right">{aggregatedMetrics.totalClicks} clicks</td>
+                      <td className="px-3 py-2 text-right">
+                        <span className="text-gray-700">{aggregatedMetrics.totalClicks}</span>
+                        <span className="text-gray-500 ml-1">clicks</span>
+                      </td>
                     )}
-                    <td className="px-4 py-3 text-right">{aggregatedMetrics.ctr.toFixed(2)}%</td>
+                    <td className="px-3 py-2 text-right">{aggregatedMetrics.ctr.toFixed(2)}%</td>
                     {visibleColumns.includes('avgCost') && (
-                      <td className="px-4 py-3 text-right">₹{aggregatedMetrics.avgCpc.toFixed(2)}</td>
+                      <td className="px-3 py-2 text-right">₹{aggregatedMetrics.avgCpc.toFixed(2)}</td>
                     )}
                     {visibleColumns.includes('cost') && (
-                      <td className="px-4 py-3 text-right">₹{aggregatedMetrics.totalCost.toFixed(2)}</td>
+                      <td className="px-3 py-2 text-right">₹{aggregatedMetrics.totalCost.toFixed(2)}</td>
                     )}
                     {visibleColumns.includes('conversions') && (
-                      <td className="px-4 py-3">{aggregatedMetrics.conversionRate.toFixed(2)}%</td>
+                      <td className="px-3 py-2">{aggregatedMetrics.conversionRate.toFixed(2)}%</td>
                     )}
-                    <td className="px-4 py-3"></td>
+                    <td className="px-3 py-2"></td>
                   </tr>
                 </>
               )}
@@ -985,54 +1271,67 @@ export const CampaignsPage: React.FC = () => {
         </div>
 
         {/* Recommendation Card */}
-        <div className="mt-6 bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
-          <div className="flex items-start gap-4">
-            <div className="bg-blue-500 rounded-full p-3 text-white flex-shrink-0">
-              <span className="text-xl">💡</span>
-            </div>
-            <div className="flex-1">
-              <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
-                <div>
-                  <h3 className="font-medium text-gray-900 mb-1">Optimize your budgets</h3>
-                  <span className="text-green-600 text-sm font-medium">+11.2%</span>
-                </div>
-                <ButtonComponent iconCss="e-icons e-more-vert" cssClass="e-flat e-small" />
-              </div>
-              <p className="text-sm text-gray-600 mb-3">
-                You missed conversions because you're limited by budget. Increasing your budget can result in more conversions, while staying within your target.
-              </p>
-              <p className="text-xs text-gray-500 mb-4">
-                Recommended because you missed out potential traffic last week based on data from the ad auctions you participated in
-              </p>
-              <div className="flex gap-2">
-                <ButtonComponent cssClass="e-primary e-small">Apply</ButtonComponent>
-                <ButtonComponent cssClass="e-flat e-small">View</ButtonComponent>
-              </div>
-            </div>
+      </div>
+
+      {/* ============================================ */}
+      {/* DIALOGS */}
+      {/* ============================================ */}
+
+      {/* Table Search Dialog - KEYWORD SEARCH ALL FIELDS */}
+      <DialogComponent
+        width="480px"
+        isModal={true}
+        visible={showTableSearchDialog}
+        close={() => setShowTableSearchDialog(false)}
+        header="Search Table"
+        showCloseIcon={true}
+      >
+        <div className="p-4">
+          <p className="text-sm text-gray-600 mb-3">
+            Search across all table fields: campaign name, ID, status, type, budget, etc.
+          </p>
+          <TextBoxComponent
+            placeholder="Enter keyword to search..."
+            showClearButton={true}
+            value={tableSearchText}
+            input={handleTableSearchChange}
+            change={handleTableSearchChange}
+            cssClass="w-full"
+          />
+          <div className="flex justify-end gap-2 pt-4">
+            <ButtonComponent onClick={() => {
+              setTableSearchText('');
+              setShowTableSearchDialog(false);
+            }}>
+              Clear & Close
+            </ButtonComponent>
+            <ButtonComponent cssClass="e-primary" onClick={() => setShowTableSearchDialog(false)}>
+              Apply Search
+            </ButtonComponent>
           </div>
         </div>
-      </div>
+      </DialogComponent>
 
       {/* Filter Dialog */}
       <DialogComponent
-        width="500px"
+        width="480px"
         isModal={true}
         visible={showFilterDialog}
         close={() => setShowFilterDialog(false)}
         header="Add Filter"
         showCloseIcon={true}
       >
-        <div className="p-4 space-y-6">
+        <div className="p-4 space-y-5">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-3">Campaign Status</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Campaign Status</label>
             <div className="space-y-2">
-              {Object.values(CampaignStatus).map((status) => (
+              {Object.values(CampaignStatusUI).map((status) => (
                 <div key={status} className="flex items-center">
                   <CheckBoxComponent
                     label={status}
-                    checked={activeFilters.campaignStatus.includes(status)}
+                    checked={localFilters.campaignStatus.includes(status)}
                     change={(e) => {
-                      setActiveFilters(prev => ({
+                      setLocalFilters(prev => ({
                         ...prev,
                         campaignStatus: e.checked
                           ? [...prev.campaignStatus, status]
@@ -1046,15 +1345,15 @@ export const CampaignsPage: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-3">Campaign Type</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Campaign Type</label>
             <div className="space-y-2">
-              {Object.values(CampaignType).map((type) => (
+              {Object.values(CampaignTypeUI).map((type) => (
                 <div key={type} className="flex items-center">
                   <CheckBoxComponent
                     label={type}
-                    checked={activeFilters.campaignType.includes(type)}
+                    checked={localFilters.campaignType.includes(type)}
                     change={(e) => {
-                      setActiveFilters(prev => ({
+                      setLocalFilters(prev => ({
                         ...prev,
                         campaignType: e.checked
                           ? [...prev.campaignType, type]
@@ -1066,25 +1365,20 @@ export const CampaignsPage: React.FC = () => {
               ))}
             </div>
           </div>
-
-          <div className="flex justify-end gap-2 pt-4 border-t">
-            <ButtonComponent onClick={() => setShowFilterDialog(false)}>Cancel</ButtonComponent>
-            <ButtonComponent cssClass="e-primary" onClick={applyFilters}>Apply Filters</ButtonComponent>
-          </div>
         </div>
       </DialogComponent>
 
       {/* Column Selection Dialog */}
       <DialogComponent
-        width="400px"
+        width="380px"
         isModal={true}
         visible={showColumnDialog}
         close={() => setShowColumnDialog(false)}
         header="Select Columns"
         showCloseIcon={true}
       >
-        <div className="p-4 space-y-3">
-          <p className="text-sm text-gray-600 mb-4">Choose which metrics to display in the table</p>
+        <div className="p-4 space-y-2">
+          <p className="text-sm text-gray-600 mb-3">Choose which metrics to display in the table</p>
           {(['impressions', 'clicks', 'conversions', 'cost', 'ctr', 'conversionRate', 'avgCost'] as MetricColumn[]).map((metric) => (
             <div key={metric} className="flex items-center">
               <CheckBoxComponent
@@ -1100,15 +1394,13 @@ export const CampaignsPage: React.FC = () => {
               />
             </div>
           ))}
-          <div className="flex justify-end gap-2 pt-4 border-t">
-            <ButtonComponent onClick={() => setShowColumnDialog(false)}>Close</ButtonComponent>
-          </div>
+          
         </div>
       </DialogComponent>
 
       {/* Segment Dialog */}
       <DialogComponent
-        width="500px"
+        width="450px"
         isModal={true}
         visible={showSegmentDialog}
         close={() => setShowSegmentDialog(false)}
@@ -1116,27 +1408,24 @@ export const CampaignsPage: React.FC = () => {
         showCloseIcon={true}
       >
         <div className="p-4">
-          <p className="text-sm text-gray-600 mb-4">Select how you want to segment your campaign data</p>
-          <div className="space-y-2">
-            <button className="w-full text-left px-4 py-2 hover:bg-gray-100 rounded">Time &gt; Day</button>
-            <button className="w-full text-left px-4 py-2 hover:bg-gray-100 rounded">Time &gt; Week</button>
-            <button className="w-full text-left px-4 py-2 hover:bg-gray-100 rounded">Time &gt; Month</button>
-            <button className="w-full text-left px-4 py-2 hover:bg-gray-100 rounded">Device</button>
-            <button className="w-full text-left px-4 py-2 hover:bg-gray-100 rounded">Network</button>
-          </div>
-          <div className="flex justify-end gap-2 pt-4 border-t mt-4">
-            <ButtonComponent onClick={() => setShowSegmentDialog(false)}>Close</ButtonComponent>
+          <p className="text-sm text-gray-600 mb-3">Select how you want to segment your campaign data</p>
+          <div className="space-y-1">
+            <button className="w-full text-left px-3 py-2 hover:bg-gray-100 rounded text-sm">Time &gt; Day</button>
+            <button className="w-full text-left px-3 py-2 hover:bg-gray-100 rounded text-sm">Time &gt; Week</button>
+            <button className="w-full text-left px-3 py-2 hover:bg-gray-100 rounded text-sm">Time &gt; Month</button>
+            <button className="w-full text-left px-3 py-2 hover:bg-gray-100 rounded text-sm">Device</button>
+            <button className="w-full text-left px-3 py-2 hover:bg-gray-100 rounded text-sm">Network</button>
           </div>
         </div>
       </DialogComponent>
 
       {/* FAB Button */}
       <button 
-        className="fixed bottom-6 left-6 bg-blue-600 hover:bg-blue-700 text-white rounded-full w-14 h-14 flex items-center justify-center shadow-lg z-50 transition-all"
+        className="fixed bottom-6 left-6 bg-blue-600 hover:bg-blue-700 text-white rounded-full w-12 h-12 flex items-center justify-center shadow-lg z-50 transition-all"
         title="New campaign"
         aria-label="Create new campaign"
       >
-        <span className="text-2xl">+</span>
+        <span className="text-xl">+</span>
       </button>
 
       {/* Scroll to Top Button */}
@@ -1146,7 +1435,7 @@ export const CampaignsPage: React.FC = () => {
         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
         aria-label="Scroll to top"
       >
-        <span className="text-gray-600">▲</span>
+        <span className="text-gray-600 text-xs">▲</span>
       </button>
     </div>
   );
