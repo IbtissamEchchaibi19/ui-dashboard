@@ -5,10 +5,9 @@ import { AdService } from '@application/services';
 import { 
   AdStatusUI, 
   AdTypeUI, 
-  AdStrengthUI,
+  AdAdStrengthUI,
   AdUI,
   AdMetricColumn,
-  AssetRow
 } from '@application/dto';
 
 // UI library imports (external dependencies)
@@ -51,7 +50,7 @@ export const AdsPage: React.FC = () => {
   const [localFilters, setLocalFilters] = useState<{
     adStatus: AdStatusUI[];
     adType: AdTypeUI[];
-    adStrength: AdStrengthUI[];
+    adStrength: AdAdStrengthUI[];
     approvalStatus: string[];
   }>({
     adStatus: [],
@@ -945,9 +944,9 @@ export const AdsPage: React.FC = () => {
                         </td>
                         <td className="px-3 py-2 text-center">
                           <span className={`font-medium ${
-                            ad.adStrength === AdStrengthUI.EXCELLENT ? 'text-green-600' :
-                            ad.adStrength === AdStrengthUI.GOOD ? 'text-blue-600' :
-                            ad.adStrength === AdStrengthUI.AVERAGE ? 'text-yellow-600' :
+                            ad.adStrength === AdAdStrengthUI.EXCELLENT ? 'text-green-600' :
+                            ad.adStrength === AdAdStrengthUI.GOOD ? 'text-blue-600' :
+                            ad.adStrength === AdAdStrengthUI.AVERAGE ? 'text-yellow-600' :
                             'text-red-600'
                           }`}>
                             {ad.adStrength}
@@ -1095,7 +1094,7 @@ export const AdsPage: React.FC = () => {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Ad Strength</label>
             <div className="space-y-2">
-              {Object.values(AdStrengthUI).map((strength) => (
+              {Object.values(AdAdStrengthUI).map((strength) => (
                 <div key={strength} className="flex items-center">
                   <CheckBoxComponent
                     label={strength}

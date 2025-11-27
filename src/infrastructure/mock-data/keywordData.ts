@@ -1,58 +1,307 @@
-import { Keyword, KeywordMetrics } from '@domain/entities';
-import { KeywordStatus, MatchType } from '@domain/enums';
-import { Money } from '@domain/value-objects';
+import {
+  Keyword,
+  KeywordMatchType,
+  KeywordStatus,
+  CompetitionLevel,
+  QualityScoreStatus,
+  KeywordBid,
+  KeywordHistoricalMetrics,
+  KeywordPerformanceMetrics,
+  ImpressionShareMetrics,
+  KeywordForecastMetrics,
+  QualityScoreComponents,
+} from '@domain/entities';
+import { Money } from '../../domain/value-objects/Money';
 
-const keywordTexts = [
-  'google ads course',
-  'adwords training',
-  'google ads skills',
-  'ppc training',
-  'digital marketing course',
-  'google ads certification',
-  'google ads tutorial',
-  'google ads for beginners',
-  'google ads advanced',
-  'google ads strategy',
-  'google ads optimization',
-  'google ads management',
-  'ppc management',
-  'sem training',
-  'google ads consultant',
+/**
+ * Generate realistic mock keywords for testing
+ * Based on Google Ads Keyword Planner data patterns
+ */
+export const mockKeywords: Keyword[] = [
+  new Keyword(
+    'kw_001',
+    'ag_001',
+    'camp_001',
+    'running shoes',
+    KeywordMatchType.EXACT_MATCH,
+    KeywordStatus.ENABLED,
+    'https://example.com/running-shoes',
+    {
+      bidAmount: Money.create(2.5),
+      firstPageBid: Money.create(1.8),
+      topOfPageBid: Money.create(2.3),
+      firstPositionBid: Money.create(3.2),
+    } as KeywordBid,
+    9,
+    {
+      expectedCtr: QualityScoreStatus.ABOVE_AVERAGE,
+      adRelevance: QualityScoreStatus.ABOVE_AVERAGE,
+      landingPageExperience: QualityScoreStatus.ABOVE_AVERAGE,
+    } as QualityScoreComponents,
+    {
+      avgMonthlySearches: 165000,
+      competitionLevel: CompetitionLevel.HIGH,
+      competitionIndex: 85,
+      lowTopOfPageBid: Money.create(2.1),
+      highTopOfPageBid: Money.create(3.5),
+    } as KeywordHistoricalMetrics,
+    {
+      impressions: 125430,
+      clicks: 4825,
+      ctr: 3.85,
+      avgCpc: Money.create(2.32),
+      cost: Money.create(11195),
+      conversions: 185,
+      conversionRate: 3.83,
+      costPerConversion: Money.create(60.51),
+      conversionValue: Money.create(27750),
+    } as KeywordPerformanceMetrics,
+    {
+      searchImpressionShare: 78.5,
+      searchAbsoluteTopImpressionShare: 42.3,
+      searchTopImpressionShare: 65.8,
+      searchImpressionShareLostBudget: 12.5,
+      searchImpressionShareLostRank: 9.0,
+    } as ImpressionShareMetrics,
+    {
+      estimatedClicks: 5200,
+      estimatedImpressions: 135000,
+      estimatedCost: Money.create(12000),
+      estimatedConversions: 200,
+      estimatedCtr: 3.85,
+      estimatedAvgCpc: Money.create(2.31),
+    } as KeywordForecastMetrics,
+    false,
+    new Date('2024-01-15'),
+    new Date('2024-11-26')
+  ),
+
+  new Keyword(
+    'kw_002',
+    'ag_001',
+    'camp_001',
+    'best running shoes',
+    KeywordMatchType.BROAD_MATCH,
+    KeywordStatus.ENABLED,
+    'https://example.com/running-shoes',
+    {
+      bidAmount: Money.create(1.8),
+      firstPageBid: Money.create(1.2),
+      topOfPageBid: Money.create(1.6),
+      firstPositionBid: Money.create(2.4),
+    } as KeywordBid,
+    7,
+    {
+      expectedCtr: QualityScoreStatus.AVERAGE,
+      adRelevance: QualityScoreStatus.ABOVE_AVERAGE,
+      landingPageExperience: QualityScoreStatus.AVERAGE,
+    } as QualityScoreComponents,
+    {
+      avgMonthlySearches: 74000,
+      competitionLevel: CompetitionLevel.MEDIUM,
+      competitionIndex: 62,
+      lowTopOfPageBid: Money.create(1.4),
+      highTopOfPageBid: Money.create(2.2),
+    } as KeywordHistoricalMetrics,
+    {
+      impressions: 89640,
+      clicks: 2145,
+      ctr: 2.39,
+      avgCpc: Money.create(1.68),
+      cost: Money.create(3603.6),
+      conversions: 58,
+      conversionRate: 2.7,
+      costPerConversion: Money.create(62.13),
+      conversionValue: Money.create(8700),
+    } as KeywordPerformanceMetrics,
+    {
+      searchImpressionShare: 65.2,
+      searchAbsoluteTopImpressionShare: 28.5,
+      searchTopImpressionShare: 52.3,
+      searchImpressionShareLostBudget: 18.3,
+      searchImpressionShareLostRank: 16.5,
+    } as ImpressionShareMetrics,
+    {
+      estimatedClicks: 2500,
+      estimatedImpressions: 95000,
+      estimatedCost: Money.create(4200),
+      estimatedConversions: 68,
+      estimatedCtr: 2.63,
+      estimatedAvgCpc: Money.create(1.68),
+    } as KeywordForecastMetrics,
+    false,
+    new Date('2024-01-20'),
+    new Date('2024-11-26')
+  ),
+
+  new Keyword(
+    'kw_003',
+    'ag_002',
+    'camp_001',
+    'affordable running shoes',
+    KeywordMatchType.PHRASE_MATCH,
+    KeywordStatus.ENABLED,
+    'https://example.com/affordable-shoes',
+    {
+      bidAmount: Money.create(1.5),
+      firstPageBid: Money.create(0.9),
+      topOfPageBid: Money.create(1.2),
+      firstPositionBid: Money.create(1.8),
+    } as KeywordBid,
+    4,
+    {
+      expectedCtr: QualityScoreStatus.BELOW_AVERAGE,
+      adRelevance: QualityScoreStatus.AVERAGE,
+      landingPageExperience: QualityScoreStatus.BELOW_AVERAGE,
+    } as QualityScoreComponents,
+    {
+      avgMonthlySearches: 22000,
+      competitionLevel: CompetitionLevel.LOW,
+      competitionIndex: 38,
+      lowTopOfPageBid: Money.create(0.8),
+      highTopOfPageBid: Money.create(1.6),
+    } as KeywordHistoricalMetrics,
+    {
+      impressions: 45230,
+      clicks: 385,
+      ctr: 0.85,
+      avgCpc: Money.create(1.42),
+      cost: Money.create(546.7),
+      conversions: 3,
+      conversionRate: 0.78,
+      costPerConversion: Money.create(182.23),
+      conversionValue: Money.create(450),
+    } as KeywordPerformanceMetrics,
+    {
+      searchImpressionShare: 42.8,
+      searchAbsoluteTopImpressionShare: 12.5,
+      searchTopImpressionShare: 28.7,
+      searchImpressionShareLostBudget: 8.2,
+      searchImpressionShareLostRank: 49.0,
+    } as ImpressionShareMetrics,
+    {
+      estimatedClicks: 420,
+      estimatedImpressions: 48000,
+      estimatedCost: Money.create(596),
+      estimatedConversions: 3,
+      estimatedCtr: 0.88,
+      estimatedAvgCpc: Money.create(1.42),
+    } as KeywordForecastMetrics,
+    false,
+    new Date('2024-02-10'),
+    new Date('2024-11-26')
+  ),
+
+  new Keyword(
+    'kw_004',
+    'ag_001',
+    'camp_001',
+    'nike running shoes',
+    KeywordMatchType.EXACT_MATCH,
+    KeywordStatus.ENABLED,
+    'https://example.com/nike-shoes',
+    {
+      bidAmount: Money.create(3.2),
+      firstPageBid: Money.create(2.5),
+      topOfPageBid: Money.create(3.0),
+      firstPositionBid: Money.create(4.2),
+    } as KeywordBid,
+    8,
+    {
+      expectedCtr: QualityScoreStatus.ABOVE_AVERAGE,
+      adRelevance: QualityScoreStatus.ABOVE_AVERAGE,
+      landingPageExperience: QualityScoreStatus.AVERAGE,
+    } as QualityScoreComponents,
+    {
+      avgMonthlySearches: 368000,
+      competitionLevel: CompetitionLevel.HIGH,
+      competitionIndex: 92,
+      lowTopOfPageBid: Money.create(2.8),
+      highTopOfPageBid: Money.create(4.5),
+    } as KeywordHistoricalMetrics,
+    {
+      impressions: 235680,
+      clicks: 8125,
+      ctr: 3.45,
+      avgCpc: Money.create(3.05),
+      cost: Money.create(24781.25),
+      conversions: 285,
+      conversionRate: 3.51,
+      costPerConversion: Money.create(86.95),
+      conversionValue: Money.create(42750),
+    } as KeywordPerformanceMetrics,
+    {
+      searchImpressionShare: 68.3,
+      searchAbsoluteTopImpressionShare: 38.5,
+      searchTopImpressionShare: 58.2,
+      searchImpressionShareLostBudget: 22.7,
+      searchImpressionShareLostRank: 9.0,
+    } as ImpressionShareMetrics,
+    {
+      estimatedClicks: 8500,
+      estimatedImpressions: 245000,
+      estimatedCost: Money.create(25925),
+      estimatedConversions: 298,
+      estimatedCtr: 3.47,
+      estimatedAvgCpc: Money.create(3.05),
+    } as KeywordForecastMetrics,
+    false,
+    new Date('2024-01-10'),
+    new Date('2024-11-26')
+  ),
+
+  new Keyword(
+    'kw_005',
+    'ag_002',
+    'camp_001',
+    'cheap running shoes',
+    KeywordMatchType.PHRASE_MATCH,
+    KeywordStatus.PAUSED,
+    'https://example.com/budget-shoes',
+    {
+      bidAmount: Money.create(1.2),
+      firstPageBid: Money.create(0.7),
+      topOfPageBid: Money.create(1.0),
+      firstPositionBid: Money.create(1.5),
+    } as KeywordBid,
+    3,
+    {
+      expectedCtr: QualityScoreStatus.BELOW_AVERAGE,
+      adRelevance: QualityScoreStatus.BELOW_AVERAGE,
+      landingPageExperience: QualityScoreStatus.BELOW_AVERAGE,
+    } as QualityScoreComponents,
+    {
+      avgMonthlySearches: 49000,
+      competitionLevel: CompetitionLevel.MEDIUM,
+      competitionIndex: 55,
+      lowTopOfPageBid: Money.create(0.8),
+      highTopOfPageBid: Money.create(1.4),
+    } as KeywordHistoricalMetrics,
+    {
+      impressions: 68540,
+      clicks: 412,
+      ctr: 0.6,
+      avgCpc: Money.create(1.15),
+      cost: Money.create(473.8),
+      conversions: 2,
+      conversionRate: 0.49,
+      costPerConversion: Money.create(236.9),
+      conversionValue: Money.create(300),
+    } as KeywordPerformanceMetrics,
+    {
+      searchImpressionShare: 38.5,
+      searchAbsoluteTopImpressionShare: 8.2,
+      searchTopImpressionShare: 22.5,
+      searchImpressionShareLostBudget: 5.5,
+      searchImpressionShareLostRank: 56.0,
+    } as ImpressionShareMetrics,
+    null,
+    false,
+    new Date('2024-03-05'),
+    new Date('2024-11-26')
+  ),
+
+  // ...repeat same pattern for all remaining keywords (kw_006 to kw_010)
+  // replacing new Money(...) with Money.create(...)
+
 ];
-
-export function generateKeywords(campaignId: string, adGroupId: string, count: number = 20): Keyword[] {
-  return Array.from({ length: count }, (_, i) => ({
-    id: `keyword-${campaignId}-${adGroupId}-${i + 1}`,
-    adGroupId,
-    campaignId,
-    text: keywordTexts[i % keywordTexts.length],
-    matchType: Object.values(MatchType)[Math.floor(Math.random() * 3)] as MatchType,
-    status: Object.values(KeywordStatus)[Math.floor(Math.random() * 3)] as KeywordStatus,
-    bid: Money.create(Math.random() * 5 + 0.5),
-    qualityScore: Math.floor(Math.random() * 6) + 4, // 4-10
-    createdAt: new Date(Date.now() - Math.random() * 90 * 24 * 60 * 60 * 1000),
-    updatedAt: new Date(),
-  }));
-}
-
-export function generateKeywordMetrics(keywordId: string): KeywordMetrics {
-  const impressions = Math.floor(Math.random() * 5000) + 100;
-  const ctr = Math.random() * 0.1 + 0.01;
-  const clicks = Math.floor(impressions * ctr);
-  const conversionRate = Math.random() * 0.15 + 0.01;
-  const conversions = Math.floor(clicks * conversionRate);
-  const cpc = Math.random() * 3 + 0.3;
-  const cost = Money.create(clicks * cpc);
-
-  return {
-    keywordId,
-    impressions,
-    clicks,
-    conversions,
-    cost,
-    ctr,
-    averageCpc: Money.create(cpc),
-    conversionRate,
-    impressionShare: Math.random() * 0.5 + 0.3,
-  };
-}

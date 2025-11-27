@@ -2,15 +2,15 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { KeywordService, KeywordTimeSeriesDataPoint } from '../services/KeywordService';
-import { DateRange } from '../../domain/value-objects/DateRange';
-import { MockKeywordRepository } from '../../infrastructure/repositories/MockKeywordRepository';
+import { DateRangeVO } from '@domain/value-objects/DateRange';
+import { MockKeywordRepository } from '@infrastructure/repositories/MockKeywordRepository';
 
 /**
  * Hook for fetching keyword performance time series data
  */
 export function useKeywordTimeSeries(
   keywordId: string,
-  dateRange: DateRange = DateRange.lastNDays(30)
+  dateRange: DateRangeVO = DateRangeVO.fromDays(30)
 ) {
   const [timeSeries, setTimeSeries] = useState<KeywordTimeSeriesDataPoint[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -50,7 +50,7 @@ export function useKeywordTimeSeries(
  */
 export function useKeywordsTimeSeriesComparison(
   keywordIds: string[],
-  dateRange: DateRange = DateRange.lastNDays(30)
+  dateRange: DateRangeVO = DateRangeVO.fromDays(30)
 ) {
   const [timeSeriesData, setTimeSeriesData] = useState<Record<string, KeywordTimeSeriesDataPoint[]>>({});
   const [loading, setLoading] = useState<boolean>(true);

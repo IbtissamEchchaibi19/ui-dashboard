@@ -14,9 +14,11 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const menuItems = [
     { id: 'Overview', text: 'Overview', route: '/Overview' },
     { id: 'campaigns', text: 'Campaigns', route: '/campaigns' },
-    { id: 'addsgroups', text: 'Ad groups', route: '/AdGroupsPage'},
+    { id: 'addsgroups', text: 'Add groups', route: '/AdGroupsPage'},
     { id: 'adds', text: 'Adds', route: '/Adspage'},
-  
+    { id: 'AssetGroup', text: 'Asset Group', route: '/AssetGroup'},
+
+
   ];
 
   const handleMenuClick = (route: string): void => {

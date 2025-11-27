@@ -4,3 +4,4 @@ export * from './AdGroup';
 export * from './Audience';
 export * from './Metric';
 export * from './Ad';
+export * from './AssetGroup'
