@@ -1,6 +1,5 @@
 import React from 'react';
 import { useOverviewMetrics, useDateRange } from '@application/hooks';
-import { MetricCard } from '@presentation/components/MetricCard';
 import { ChartComponent, SeriesCollectionDirective, SeriesDirective, Inject, LineSeries, DateTime, Legend, Tooltip } from '@syncfusion/ej2-react-charts';
 import { DropDownListComponent } from '@syncfusion/ej2-react-dropdowns';
 

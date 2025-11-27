@@ -1,3 +1,4 @@
+// domain/value-objects/Money.ts
 export interface MoneyValue {
   amount: number;
   currency: string;
@@ -38,6 +39,49 @@ export class Money {
     return new Money(this.amount * factor, this.currency);
   }
 
+  /**
+   * ➕ Newly added (missing in first file)
+   * Divide money by a factor
+   */
+  divide(factor: number): Money {
+    if (factor === 0) {
+      throw new Error('Cannot divide by zero');
+    }
+    return new Money(this.amount / factor, this.currency);
+  }
+
+  /**
+   * ➕ Newly added
+   * Check if exactly equal to another Money object
+   */
+  equals(other: Money): boolean {
+    return this.amount === other.amount && this.currency === other.currency;
+  }
+
+  /**
+   * ➕ NEW method (safe)
+   * Symbol-based formatting WITHOUT modifying the original format()
+   */
+  formatWithSymbol(): string {
+    const symbols: Record<string, string> = {
+      USD: '$',
+      INR: '₹',
+      EUR: '€',
+      GBP: '£',
+      JPY: '¥',
+    };
+
+    const symbol = symbols[this.currency] || this.currency;
+
+    return `${symbol}${this.amount.toLocaleString('en-US', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })}`;
+  }
+
+  /**
+   * ORIGINAL — unchanged
+   */
   format(): string {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -45,6 +89,9 @@ export class Money {
     }).format(this.amount);
   }
 
+  /**
+   * ORIGINAL — unchanged
+   */
   toJSON(): MoneyValue {
     return {
       amount: this.amount,

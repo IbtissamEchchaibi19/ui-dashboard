@@ -14,6 +14,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const menuItems = [
     { id: 'campaigns', text: 'Campaigns', route: '/campaigns' },
     { id: 'audiences', text: 'Audiences', route: '/audiences' },
+    { id: 'adds', text: 'Adds', route: '/Adspage'},
   ];
 
   const handleMenuClick = (route: string): void => {
@@ -52,10 +53,6 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                 }`}
               >
                 <span className={`text-xl ${isActive ? 'text-blue-600' : 'text-gray-600'}`}>
-                  {item.icon === 'e-icons e-home' && '🏠'}
-                  {item.icon === 'e-icons e-broadcast' && '📢'}
-                  {item.icon === 'e-icons e-search' && '🔍'}
-                  {item.icon === 'e-icons e-people' && '👥'}
                 </span>
                 {isSidebarOpen && <span className="text-sm font-medium">{item.text}</span>}
               </button>

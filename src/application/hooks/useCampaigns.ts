@@ -1,4 +1,4 @@
-// usecompain
+// usecompaign hook
 import { useState, useEffect, useCallback } from 'react';
 import { Campaign, CampaignMetrics } from '@domain/entities';
 // import { CampaignStatus, CampaignType } from '@domain/enums';

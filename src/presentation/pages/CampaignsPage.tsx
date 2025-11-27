@@ -1298,17 +1298,6 @@ export const CampaignsPage: React.FC = () => {
             change={handleTableSearchChange}
             cssClass="w-full"
           />
-          <div className="flex justify-end gap-2 pt-4">
-            <ButtonComponent onClick={() => {
-              setTableSearchText('');
-              setShowTableSearchDialog(false);
-            }}>
-              Clear & Close
-            </ButtonComponent>
-            <ButtonComponent cssClass="e-primary" onClick={() => setShowTableSearchDialog(false)}>
-              Apply Search
-            </ButtonComponent>
-          </div>
         </div>
       </DialogComponent>
 
