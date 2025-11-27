@@ -1,5 +1,5 @@
 export * from './CampaignService';
-export * from './KeywordService';
 export * from './AudienceService';
 export * from './MetricsService';
-export * from './AdService'
+export * from './AdService';
+export * from './AdGroupService'

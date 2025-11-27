@@ -12,9 +12,11 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(true);
 
   const menuItems = [
+    { id: 'Overview', text: 'Overview', route: '/Overview' },
     { id: 'campaigns', text: 'Campaigns', route: '/campaigns' },
-    { id: 'audiences', text: 'Audiences', route: '/audiences' },
+    { id: 'addsgroups', text: 'Ad groups', route: '/AdGroupsPage'},
     { id: 'adds', text: 'Adds', route: '/Adspage'},
+  
   ];
 
   const handleMenuClick = (route: string): void => {
