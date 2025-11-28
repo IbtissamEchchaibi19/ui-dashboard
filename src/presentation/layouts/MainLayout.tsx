@@ -36,11 +36,11 @@ const menuItems: MenuItem[] = [
       { id: 'auction-insights', text: 'Auction insights', route: '/auction-insights' },
       { id: 'search-terms', text: 'Search terms', route: '/search-terms' },
       { id: 'when-where', text: 'When and where ads showed', route: '/when-where-ads-showed' },
-      { id: 'channel-performance', text: 'Channel performance', route: '/channel-performance' },
+      // { id: 'channel-performance', text: 'Channel performance', route: '/channel-performance' },
       { id: 'landing-pages', text: 'Landing pages', route: '/landing-pages' },
       { id: 'stores', text: 'Stores', route: '/stores' },
       { id: 'report-editor', text: 'Report editor', route: '/report-editor' },
-      { id: 'dashboards', text: 'Dashboards', route: '/dashboards' },
+      // { id: 'dashboards', text: 'Dashboards', route: '/dashboards' },
     ]
   },
 
