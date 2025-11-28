@@ -23,42 +23,67 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     audiences: false,
   });
 
-  const menuItems: MenuItem[] = [
-    { id: 'overview', text: 'Overview', route: '/Overview' },
-    { id: 'recommendations', text: 'Recommendations', route: '/recommendations' },
-    {
-      id: 'insights',
-      text: 'Insights and reports',
-      route: '/insight',
-      subItems: []
-    },
-    {
-      id: 'campaigns',
-      text: 'Campaigns',
-      route: '#',
-      subItems: [
-        { id: 'campaigns-main', text: 'Campaigns', route: '/campaigns' },
-        { id: 'adgroups', text: 'Ad groups', route: '/AdGroupsPage' },
-        { id: 'ads', text: 'Ads', route: '/Adspage' },
-        { id: 'assetgroups', text: 'Asset groups', route: '/AssetGroup' },
-        { id: 'experiments', text: 'Experiments', route: '/experiments' },
-        { id: 'campaigngroups', text: 'Campaign groups', route: '/campaign-groups' },
-      ]
-    },
-    {
-      id: 'assets',
-      text: 'Assets',
-      route: '#',
-      subItems: [ { id: 'asset', text: 'Asset', route: '/Asset' }]
-    },
-    {
-      id: 'audiences',
-      text: 'Audiences, keywords, and content',
-      route: '#',
-      subItems: []
-    },
-    { id: 'history', text: 'Change history', route: '/change-history' },
-  ];
+const menuItems: MenuItem[] = [
+  { id: 'overview', text: 'Overview', route: '/Overview' },
+  { id: 'recommendations', text: 'Recommendations', route: '/recommendations' },
+
+  {
+    id: 'insights',
+    text: 'Insights and reports',
+    route: '#',
+    subItems: [
+      { id: 'insights-main', text: 'Insights', route: '/insights' },
+      { id: 'auction-insights', text: 'Auction insights', route: '/auction-insights' },
+      { id: 'search-terms', text: 'Search terms', route: '/search-terms' },
+      { id: 'when-where', text: 'When and where ads showed', route: '/when-where-ads-showed' },
+      { id: 'channel-performance', text: 'Channel performance', route: '/channel-performance' },
+      { id: 'landing-pages', text: 'Landing pages', route: '/landing-pages' },
+      { id: 'stores', text: 'Stores', route: '/stores' },
+      { id: 'report-editor', text: 'Report editor', route: '/report-editor' },
+      { id: 'dashboards', text: 'Dashboards', route: '/dashboards' },
+    ]
+  },
+
+  {
+    id: 'campaigns',
+    text: 'Campaigns',
+    route: '#',
+    subItems: [
+      { id: 'campaigns-main', text: 'Campaigns', route: '/campaigns' },
+      { id: 'adgroups', text: 'Ad groups', route: '/AdGroupsPage' },
+      { id: 'ads', text: 'Ads', route: '/Adspage' },
+      { id: 'assetgroups', text: 'Asset groups', route: '/AssetGroup' },
+      { id: 'experiments', text: 'Experiments', route: '/experiments' },
+      { id: 'campaigngroups', text: 'Campaign groups', route: '/campaign-groups' },
+    ]
+  },
+
+  {
+    id: 'assets',
+    text: 'Assets',
+    route: '#',
+    subItems: [
+      { id: 'asset', text: 'Asset', route: '/Asset' },
+    ]
+  },
+
+  {
+    id: 'audiences',
+    text: 'Audiences, keywords, and content',
+    route: '#',
+    subItems: [
+      { id: 'keywords', text: 'Keywords', route: '/keywords' },
+      { id: 'audiences-main', text: 'Audiences', route: '/audiences' },
+      { id: 'locations', text: 'Locations', route: '/locations' },
+      { id: 'content', text: 'Content', route: '/content' },
+      { id: 'ad-schedule', text: 'Ad schedule', route: '/ad-schedule' },
+      { id: 'advanced-bid', text: 'Advanced bid adjustments', route: '/advanced-bid-adjustments' },
+    ]
+  },
+
+  { id: 'history', text: 'Change history', route: '/change-history' },
+];
+
 
   const toggleSection = (sectionId: string) => {
     setExpandedSections(prev => ({
