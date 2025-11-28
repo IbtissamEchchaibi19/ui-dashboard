@@ -11,6 +11,8 @@ import {AdsPage} from '@presentation/pages/AdPage'
 import { GoogleAdsExperiments} from '@presentation/pages/GoogleAdsExperiments'
 import { GoogleAdsCampaignGroups} from '@presentation/pages/GoogleAdsCampaignGroups'
 import {GoogleAdsRecommendations} from '@presentation/pages/GoogleAdsRecommendations'
+import {ChangeHistoryPage} from '@presentation/pages/ChangeHistoryPage'
+
 
 const App: React.FC = () => {
   return (
@@ -27,6 +29,7 @@ const App: React.FC = () => {
           <Route path="/AssetGroup" element={<AssetGroupsPage/>} />
           <Route path="/experiments" element={<GoogleAdsExperiments/>} />
           <Route path="/campaign-groups" element={<GoogleAdsCampaignGroups/>} />
+          <Route path="/change-history" element={<ChangeHistoryPage/>} />
         </Routes>
       </MainLayout>
     </Router>
