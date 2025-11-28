@@ -49,7 +49,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       id: 'assets',
       text: 'Assets',
       route: '#',
-      subItems: []
+      subItems: [ { id: 'asset', text: 'Asset', route: '/Asset' }]
     },
     {
       id: 'audiences',
