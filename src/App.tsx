@@ -17,6 +17,12 @@ import { LocationsPage } from '@presentation/pages/LocationsPage';
 import { AdSchedulePage } from '@presentation/pages/Adschedulepage';
 import { ContentPage } from '@presentation/pages/Contentpage';
 import { AdvancedBidAdjustmentsPage } from '@presentation/pages/Advancedbidadjustmentspage';
+import {InsightsPage} from '@presentation/pages/Insightspage';
+import {LandingPagesPage} from '@presentation/pages/LandingPagesPage'
+import { SearchTermsPage } from '@presentation/pages/Searchtermspage';
+import { WhenWhereAdsShowedPage } from '@presentation/pages/WhenWhereAdsShowedPage';
+import { StoresPage } from '@presentation/pages/Storespage';
+import { AuctionInsightsPage } from '@presentation/pages/Auctioninsightspage';
 
 
 const App: React.FC = () => {
@@ -40,7 +46,13 @@ const App: React.FC = () => {
           <Route path="/locations" element={<LocationsPage/>} />
           <Route path="/content" element={<ContentPage/>} />
           <Route path="/ad-schedule" element={<AdSchedulePage/>} />
-          <Route path="/advanced-bid-adjustments" element={<AdvancedBidAdjustmentsPage/>} />
+         <Route path="/advanced-bid-adjustments" element={<AdvancedBidAdjustmentsPage/>} />
+         <Route path="/insights" element={<InsightsPage/>} /> 
+        <Route path="/auction-insights" element={<AuctionInsightsPage/>} /> 
+         <Route path="/search-terms" element={<SearchTermsPage/>} /> 
+        <Route path="/when-where-ads-showed" element={< WhenWhereAdsShowedPage/>} /> 
+         <Route path="/landing-pages" element={<LandingPagesPage/>} />  
+           <Route path="/stores" element={<StoresPage/>} /> 
           
           
           
