@@ -54,7 +54,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         { id: 'ads', text: 'Ads', route: '/Adspage' },
         { id: 'assetgroups', text: 'Asset groups', route: '/AssetGroup' },
         { id: 'experiments', text: 'Experiments', route: '/experiments' },
-        { id: 'campaigngroups', text: 'Campaign groups', route: '/campaign-groups' },
+        // { id: 'campaigngroups', text: 'Campaign groups', route: '/campaign-groups' },
       ]
     },
 

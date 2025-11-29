@@ -609,55 +609,80 @@ export const  WhenWhereAdsShowedPage : React.FC = () =>{
       </div>
 
       {/* Chart Section */}
-      <div className="bg-white mx-6 mt-6 rounded border border-gray-200">
-        <div className="px-6 py-4 flex items-center justify-end gap-4">
+      <div className="bg-white px-6 pt-6">
+        {/* Chart Controls */}
+        <div className="flex items-center justify-end gap-3 mb-4">
           <select 
             value={selectedMetric}
             onChange={(e) => setSelectedMetric(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded text-sm bg-white"
+            className="px-4 py-2 border border-gray-300 rounded text-sm bg-white hover:bg-gray-50 cursor-pointer"
           >
             <option value="clicks">▬ Clicks</option>
             <option value="impressions">▬ Impressions</option>
             <option value="cost">▬ Cost</option>
+            <option value="interactionRate">▬ Interaction rate</option>
           </select>
           
           <select 
             value={selectedComparison}
             onChange={(e) => setSelectedComparison(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded text-sm bg-white"
+            className="px-4 py-2 border border-gray-300 rounded text-sm bg-white hover:bg-gray-50 cursor-pointer"
           >
             <option value="none">▬ None</option>
-            <option value="previous">Compare periods</option>
+            <option value="previous">Compare to: Previous period</option>
+            <option value="lastYear">Compare to: Last year</option>
           </select>
           
-          <button className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:text-gray-900">
+          <button className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded">
+      
             Chart type
           </button>
           
-          <button className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:text-gray-900">
+          <button className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded">
             <Maximize2 className="w-4 h-4" />
             Expand
           </button>
+          
+          <button className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded">
+        
+            Adjust
+          </button>
         </div>
 
-        <div className="px-6 pb-6">
-          <div className="h-64 bg-white relative">
-            <svg className="w-full h-full" viewBox="0 0 1800 256" preserveAspectRatio="none">
-              <line x1="0" y1="64" x2="1800" y2="64" stroke="#e5e7eb" strokeWidth="1" />
-              <line x1="0" y1="128" x2="1800" y2="128" stroke="#e5e7eb" strokeWidth="1" />
-              <line x1="0" y1="192" x2="1800" y2="192" stroke="#e5e7eb" strokeWidth="1" />
+        {/* Chart */}
+        <div className="pb-6">
+          <div className="h-64 bg-white relative border-l border-b border-gray-200">
+            <svg className="w-full h-full" viewBox="0 0 1400 256" preserveAspectRatio="none">
+              {/* Grid lines */}
+              <line x1="0" y1="51" x2="1400" y2="51" stroke="#e5e7eb" strokeWidth="1" />
+              <line x1="0" y1="128" x2="1400" y2="128" stroke="#e5e7eb" strokeWidth="1" />
+              <line x1="0" y1="205" x2="1400" y2="205" stroke="#e5e7eb" strokeWidth="1" />
               
-              <polyline
-                points={chartDataPoints.map(p => `${p.x},${p.y}`).join(' ')}
+              {/* Weekend shading */}
+              <rect x="200" y="0" width="100" height="256" fill="#f3f4f6" opacity="0.6" />
+              <rect x="550" y="0" width="100" height="256" fill="#f3f4f6" opacity="0.6" />
+              <rect x="900" y="0" width="100" height="256" fill="#f3f4f6" opacity="0.6" />
+              <rect x="1250" y="0" width="100" height="256" fill="#f3f4f6" opacity="0.6" />
+              
+              {/* Line graph - matching Google Ads curve */}
+              <path
+                d="M 0,210 L 50,200 L 100,180 L 150,160 L 200,140 L 250,105 L 300,85 L 350,230 L 400,235 L 450,238 L 500,237 L 550,236 L 600,237 L 650,235 L 700,234 L 750,236 L 800,235 L 850,237 L 900,236 L 950,233 L 1000,235 L 1050,232 L 1100,230 L 1150,232 L 1200,228 L 1250,230 L 1300,232 L 1350,230 L 1400,232"
                 fill="none"
-                stroke="#2563eb"
+                stroke="#1a73e8"
                 strokeWidth="2"
+                vectorEffect="non-scaling-stroke"
               />
-              
-              {chartDataPoints.map((point, idx) => (
-                <circle key={idx} cx={point.x} cy={point.y} r="3" fill="#2563eb" />
-              ))}
             </svg>
+            
+            {/* Y-axis labels */}
+            <div className="absolute -left-8 top-8 text-xs text-gray-600">40</div>
+            <div className="absolute -left-8 top-[120px] text-xs text-gray-600">20</div>
+            <div className="absolute -left-6 bottom-2 text-xs text-gray-600">0</div>
+          </div>
+          
+          <div className="flex justify-between mt-2 text-xs text-gray-600 pl-2">
+            <span>Nov 1, 2025</span>
+            <span className="pr-4">Nov 29, 2025</span>
           </div>
         </div>
       </div>

@@ -598,26 +598,6 @@ export const AdGroupsPage: React.FC = () => {
       <div className="border-b border-gray-200 bg-white">
         <div className="px-4 py-2 flex items-center justify-between gap-4">
           {/* Left: Search Bar */}
-          <div className="flex-1 max-w-xs">
-            <TextBoxComponent
-              placeholder="Search for ad groups or campaigns"
-              showClearButton={true}
-              value={topSearchText}
-              input={handleTopSearchChange}
-              change={handleTopSearchChange}
-              cssClass="w-full"
-            />
-          </div>
-
-          {/* Right: User actions */}
-          <div className="flex items-center gap-3">
-            <ButtonComponent iconCss="e-icons e-refresh" cssClass="e-flat e-small" title="Refresh" onClick={refetch} />
-            <ButtonComponent iconCss="e-icons e-help" cssClass="e-flat e-small" title="Help" />
-            <span className="text-xs text-gray-600">Account</span>
-            <div className="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center text-sm">
-              A
-            </div>
-          </div>
         </div>
 
         {/* Page Title and Date Range */}

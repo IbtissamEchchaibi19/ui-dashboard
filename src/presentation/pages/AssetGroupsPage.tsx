@@ -581,55 +581,7 @@ export const AssetGroupsPage: React.FC = () => {
       </div>
       {/* TOP BAR */}
       <div className="border-b border-gray-200 bg-white">
-        <div className="px-4 py-2 flex items-center justify-between gap-4">
-          {/* Left: Search Bar */}
-          <div className="flex-1 max-w-xs">
-            <TextBoxComponent
-              placeholder="Search asset groups or campaigns"
-              showClearButton={true}
-              value={topSearchText}
-              input={handleTopSearchChange}
-              change={handleTopSearchChange}
-              cssClass="w-full"
-            />
-          </div>
 
-          {/* Right: User actions */}
-          <div className="flex items-center gap-3">
-            <ButtonComponent iconCss="e-icons e-refresh" cssClass="e-flat e-small" title="Refresh" onClick={refetch} />
-            <ButtonComponent iconCss="e-icons e-help" cssClass="e-flat e-small" title="Help" />
-            <span className="text-xs text-gray-600">Performance Max</span>
-            <div className="w-8 h-8 rounded-full bg-purple-500 text-white flex items-center justify-center text-sm">
-              P
-            </div>
-          </div>
-        </div>
-
-        {/* Page Title and Date Range */}
-        <div className="px-4 py-3 flex items-center justify-between border-t border-gray-100">
-          <div>
-            <h1 className="text-2xl font-normal text-gray-900">Asset groups</h1>
-            <p className="text-xs text-gray-500 mt-1">Performance Max campaigns</p>
-          </div>
-          
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-600">{formatDisplay()}</span>
-            <DropDownListComponent
-              dataSource={dateRangePresets}
-              fields={{ text: 'text', value: 'value' }}
-              value={preset}
-              change={handleDateRangeChange}
-              placeholder="Select date range"
-              cssClass="w-44"
-            />
-            <ButtonComponent 
-              cssClass="e-link e-small text-blue-600"
-              onClick={() => setPreset('last30days')}
-            >
-              Show last 30 days
-            </ButtonComponent>
-          </div>
-        </div>
       </div>
 
       {/* FILTER CHIPS BAR */}
@@ -697,7 +649,7 @@ export const AssetGroupsPage: React.FC = () => {
       <div className="px-4 py-4">
         {/* METRICS CARDS */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-4">
-          <div className="bg-purple-500 rounded p-4 text-white">
+          <div className="bg-blue-500 rounded p-4 text-white">
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs font-medium">Impr.</span>
               <ButtonComponent iconCss="e-icons e-more-vert" cssClass="e-flat e-small text-white" />
@@ -797,7 +749,7 @@ export const AssetGroupsPage: React.FC = () => {
                   type="Line"
                   width={2}
                   marker={{ visible: false }}
-                  fill="#9333ea"
+                  fill="rgba(51, 66, 234, 1)"
                 />
                 <SeriesDirective
                   dataSource={timeSeriesData}

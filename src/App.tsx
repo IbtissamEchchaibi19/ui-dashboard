@@ -39,7 +39,7 @@ const App: React.FC = () => {
           <Route path="/Asset" element={<AssetsPage/>} />
           <Route path="/AssetGroup" element={<AssetGroupsPage/>} />
           <Route path="/experiments" element={<GoogleAdsExperiments/>} />
-          <Route path="/campaign-groups" element={<GoogleAdsCampaignGroups/>} />
+          {/* <Route path="/campaign-groups" element={<GoogleAdsCampaignGroups/>} /> */}
           <Route path="/change-history" element={<ChangeHistoryPage/>} />
           <Route path="/keywords" element={<KeywordsPage/>} />
           <Route path="/audiences" element={<AudiencesPage/>} />

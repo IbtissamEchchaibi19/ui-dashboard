@@ -109,7 +109,8 @@ const assetTypeFilters = [
 // Main Component
 
 // ──────────────────────────────────────────────────────────────
-export const  AssetsPage: React.FC = () =>  {
+
+export const  AssetsPage: React.FC = ()=> {
   const [selectedTab, setSelectedTab] = useState('associations');
   const [selectedAssetType, setSelectedAssetType] = useState('all');
   const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
@@ -159,6 +160,35 @@ export const  AssetsPage: React.FC = () =>  {
       return newSet;
     });
   };
+
+  // Filter assets based on selected type
+  const getFilteredAssets = (assets: Asset[]) => {
+    if (selectedAssetType === 'all') return assets;
+    
+    const filterMap: Record<string, string[]> = {
+      image: ['Image'],
+      businessName: ['Business name'],
+      businessLogo: ['Business logo'],
+      sitelink: ['Sitelink'],
+      headline: ['Headline'],
+      description: ['Description'],
+      callout: ['Callout'],
+      structuredSnippet: ['Structured snippet'],
+      call: ['Call'],
+      leadForm: ['Lead form'],
+      message: ['Message'],
+      location: ['Location'],
+      price: ['Price'],
+      app: ['App'],
+      promotion: ['Promotion']
+    };
+    
+    const allowedTypes = filterMap[selectedAssetType] || [];
+    return assets.filter(asset => allowedTypes.includes(asset.assetType));
+  };
+
+  const filteredAccountAssets = getFilteredAssets(accountAssets);
+  const filteredCampaignAssets = getFilteredAssets(campaignAssets);
 
   return (
     <div className="min-h-screen bg-white">
@@ -274,6 +304,7 @@ export const  AssetsPage: React.FC = () =>  {
           {assetTypeFilters.map((filter) => (
             <button
               key={filter.id}
+              onMouseEnter={() => setSelectedAssetType(filter.id)}
               onClick={() => setSelectedAssetType(filter.id)}
               className={`flex items-center gap-2 px-3 py-2 rounded-full text-sm transition-colors ${
                 selectedAssetType === filter.id
@@ -397,134 +428,151 @@ export const  AssetsPage: React.FC = () =>  {
             </thead>
             <tbody className="bg-white">
               {/* Account Group */}
-              <tr className="bg-gray-50 border-b border-gray-200">
-                <td colSpan={13} className="px-4 py-2">
-                  <button 
-                    onClick={() => toggleGroupExpansion('account')}
-                    className="flex items-center gap-2 text-sm font-medium text-gray-900"
-                  >
-                    {expandedGroups.has('account') ? '▼' : '▶'}
-                    <span>Account</span>
-                  </button>
-                </td>
-              </tr>
-              
-              {expandedGroups.has('account') && accountAssets.map((asset) => (
-                <tr key={asset.id} className="border-b border-gray-100 hover:bg-gray-50">
-                  <td className="px-4 py-3">
-                    <input 
-                      type="checkbox" 
-                      className="rounded border-gray-300 cursor-pointer"
-                      checked={selectedRows.has(asset.id)}
-                      onChange={() => toggleRowSelection(asset.id)}
-                    />
-                  </td>
-                  <td className="px-4 py-3">
-                    <span className={`w-2 h-2 rounded-full inline-block ${
-                      asset.status === 'Enabled' ? 'bg-green-500' : 
-                      asset.status === 'Paused' ? 'bg-yellow-500' : 'bg-gray-400'
-                    }`}></span>
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-2">
-                      {asset.imageUrl && (
-                        <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center text-lg">
-                          {asset.imageUrl}
+              {filteredAccountAssets.length > 0 && (
+                <>
+                  <tr className="bg-gray-50 border-b border-gray-200">
+                    <td colSpan={13} className="px-4 py-2">
+                      <button 
+                        onClick={() => toggleGroupExpansion('account')}
+                        className="flex items-center gap-2 text-sm font-medium text-gray-900"
+                      >
+                        {expandedGroups.has('account') ? '▼' : '▶'}
+                        <span>Account</span>
+                      </button>
+                    </td>
+                  </tr>
+                  
+                  {expandedGroups.has('account') && filteredAccountAssets.map((asset) => (
+                    <tr key={asset.id} className="border-b border-gray-100 hover:bg-gray-50">
+                      <td className="px-4 py-3">
+                        <input 
+                          type="checkbox" 
+                          className="rounded border-gray-300 cursor-pointer"
+                          checked={selectedRows.has(asset.id)}
+                          onChange={() => toggleRowSelection(asset.id)}
+                        />
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className={`w-2 h-2 rounded-full inline-block ${
+                          asset.status === 'Enabled' ? 'bg-green-500' : 
+                          asset.status === 'Paused' ? 'bg-yellow-500' : 'bg-gray-400'
+                        }`}></span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-2">
+                          {asset.imageUrl && (
+                            <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center text-lg">
+                              {asset.imageUrl}
+                            </div>
+                          )}
+                          <a href="#" className="text-blue-600 hover:underline">
+                            {asset.name}
+                          </a>
                         </div>
-                      )}
-                      <a href="#" className="text-blue-600 hover:underline">
-                        {asset.name}
-                      </a>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 text-gray-700">{asset.assetType}</td>
-                  <td className="px-4 py-3 text-gray-700">{asset.level}</td>
-                  <td className="px-4 py-3 text-gray-700">{asset.status}</td>
-                  <td className="px-4 py-3">
-                    <a href="#" className="text-blue-600 hover:underline">{asset.addedBy}</a>
-                  </td>
-                  <td className="px-4 py-3 text-gray-700">{asset.lastUpdated}</td>
-                  <td className="px-4 py-3 text-right text-gray-700">{asset.impressions.toLocaleString()}</td>
-                  <td className="px-4 py-3 text-right text-gray-700">
-                    {asset.interactions > 0 ? (
-                      <>
-                        {asset.interactions.toLocaleString()}
-                        <div className="text-xs text-gray-500">clicks</div>
-                      </>
-                    ) : (
-                      asset.interactions
-                    )}
-                  </td>
-                  <td className="px-4 py-3 text-right text-gray-700">{asset.interactionRate}</td>
-                  <td className="px-4 py-3 text-right text-gray-700">{asset.avgCost}</td>
-                  <td className="px-4 py-3 text-right text-gray-700">{asset.cost}</td>
-                </tr>
-              ))}
+                      </td>
+                      <td className="px-4 py-3 text-gray-700">{asset.assetType}</td>
+                      <td className="px-4 py-3 text-gray-700">{asset.level}</td>
+                      <td className="px-4 py-3 text-gray-700">{asset.status}</td>
+                      <td className="px-4 py-3">
+                        <a href="#" className="text-blue-600 hover:underline">{asset.addedBy}</a>
+                      </td>
+                      <td className="px-4 py-3 text-gray-700">{asset.lastUpdated}</td>
+                      <td className="px-4 py-3 text-right text-gray-700">{asset.impressions.toLocaleString()}</td>
+                      <td className="px-4 py-3 text-right text-gray-700">
+                        {asset.interactions > 0 ? (
+                          <>
+                            {asset.interactions.toLocaleString()}
+                            <div className="text-xs text-gray-500">clicks</div>
+                          </>
+                        ) : (
+                          asset.interactions
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-right text-gray-700">{asset.interactionRate}</td>
+                      <td className="px-4 py-3 text-right text-gray-700">{asset.avgCost}</td>
+                      <td className="px-4 py-3 text-right text-gray-700">{asset.cost}</td>
+                    </tr>
+                  ))}
+                </>
+              )}
 
               {/* Campaign Group */}
-              <tr className="bg-gray-50 border-b border-gray-200">
-                <td colSpan={13} className="px-4 py-2">
-                  <button 
-                    onClick={() => toggleGroupExpansion('campaign')}
-                    className="flex items-center gap-2 text-sm font-medium text-blue-600 hover:underline"
-                  >
-                    {expandedGroups.has('campaign') ? '▼' : '▶'}
-                    <span>Campaign #1</span>
-                  </button>
-                </td>
-              </tr>
-              
-              {expandedGroups.has('campaign') && campaignAssets.map((asset) => (
-                <tr key={asset.id} className="border-b border-gray-100 hover:bg-gray-50">
-                  <td className="px-4 py-3">
-                    <input 
-                      type="checkbox" 
-                      className="rounded border-gray-300 cursor-pointer"
-                      checked={selectedRows.has(asset.id)}
-                      onChange={() => toggleRowSelection(asset.id)}
-                    />
-                  </td>
-                  <td className="px-4 py-3">
-                    <span className={`w-2 h-2 rounded-full inline-block ${
-                      asset.status === 'Enabled' ? 'bg-green-500' : 
-                      asset.status === 'Paused' ? 'bg-yellow-500' : 'bg-gray-400'
-                    }`}></span>
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-2">
-                      {asset.imageUrl && (
-                        <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center text-lg">
-                          {asset.imageUrl}
+              {filteredCampaignAssets.length > 0 && (
+                <>
+                  <tr className="bg-gray-50 border-b border-gray-200">
+                    <td colSpan={13} className="px-4 py-2">
+                      <button 
+                        onClick={() => toggleGroupExpansion('campaign')}
+                        className="flex items-center gap-2 text-sm font-medium text-blue-600 hover:underline"
+                      >
+                        {expandedGroups.has('campaign') ? '▼' : '▶'}
+                        <span>Campaign #1</span>
+                      </button>
+                    </td>
+                  </tr>
+                  
+                  {expandedGroups.has('campaign') && filteredCampaignAssets.map((asset) => (
+                    <tr key={asset.id} className="border-b border-gray-100 hover:bg-gray-50">
+                      <td className="px-4 py-3">
+                        <input 
+                          type="checkbox" 
+                          className="rounded border-gray-300 cursor-pointer"
+                          checked={selectedRows.has(asset.id)}
+                          onChange={() => toggleRowSelection(asset.id)}
+                        />
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className={`w-2 h-2 rounded-full inline-block ${
+                          asset.status === 'Enabled' ? 'bg-green-500' : 
+                          asset.status === 'Paused' ? 'bg-yellow-500' : 'bg-gray-400'
+                        }`}></span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-2">
+                          {asset.imageUrl && (
+                            <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center text-lg">
+                              {asset.imageUrl}
+                            </div>
+                          )}
+                          <a href="#" className="text-blue-600 hover:underline">
+                            {asset.name}
+                          </a>
                         </div>
-                      )}
-                      <a href="#" className="text-blue-600 hover:underline">
-                        {asset.name}
-                      </a>
-                    </div>
+                      </td>
+                      <td className="px-4 py-3 text-gray-700">{asset.assetType}</td>
+                      <td className="px-4 py-3 text-gray-700">{asset.level}</td>
+                      <td className="px-4 py-3 text-gray-700">{asset.status}</td>
+                      <td className="px-4 py-3">
+                        <a href="#" className="text-blue-600 hover:underline">{asset.addedBy}</a>
+                      </td>
+                      <td className="px-4 py-3 text-gray-700">{asset.lastUpdated}</td>
+                      <td className="px-4 py-3 text-right text-gray-700">{asset.impressions.toLocaleString()}</td>
+                      <td className="px-4 py-3 text-right text-gray-700">
+                        {asset.interactions > 0 ? (
+                          <>
+                            {asset.interactions.toLocaleString()}
+                            <div className="text-xs text-gray-500">clicks</div>
+                          </>
+                        ) : (
+                          asset.interactions
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-right text-gray-700">{asset.interactionRate}</td>
+                      <td className="px-4 py-3 text-right text-gray-700">{asset.avgCost}</td>
+                      <td className="px-4 py-3 text-right text-gray-700">{asset.cost}</td>
+                    </tr>
+                  ))}
+                </>
+              )}
+
+              {/* No Results Message */}
+              {filteredAccountAssets.length === 0 && filteredCampaignAssets.length === 0 && (
+                <tr>
+                  <td colSpan={13} className="px-4 py-8 text-center text-gray-500">
+                    No assets found for the selected filter
                   </td>
-                  <td className="px-4 py-3 text-gray-700">{asset.assetType}</td>
-                  <td className="px-4 py-3 text-gray-700">{asset.level}</td>
-                  <td className="px-4 py-3 text-gray-700">{asset.status}</td>
-                  <td className="px-4 py-3">
-                    <a href="#" className="text-blue-600 hover:underline">{asset.addedBy}</a>
-                  </td>
-                  <td className="px-4 py-3 text-gray-700">{asset.lastUpdated}</td>
-                  <td className="px-4 py-3 text-right text-gray-700">{asset.impressions.toLocaleString()}</td>
-                  <td className="px-4 py-3 text-right text-gray-700">
-                    {asset.interactions > 0 ? (
-                      <>
-                        {asset.interactions.toLocaleString()}
-                        <div className="text-xs text-gray-500">clicks</div>
-                      </>
-                    ) : (
-                      asset.interactions
-                    )}
-                  </td>
-                  <td className="px-4 py-3 text-right text-gray-700">{asset.interactionRate}</td>
-                  <td className="px-4 py-3 text-right text-gray-700">{asset.avgCost}</td>
-                  <td className="px-4 py-3 text-right text-gray-700">{asset.cost}</td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>
