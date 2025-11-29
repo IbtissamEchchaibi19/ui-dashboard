@@ -461,133 +461,59 @@ export const CampaignsPage: React.FC = () => {
       {/* ============================================ */}
       {/* TOP BAR - Search + Navigation (Google Ads Style) */}
       {/* ============================================ */}
-      <div className="border-b border-gray-200 bg-white">
-        <div className="px-4 py-2 flex items-center justify-between gap-4">
-          {/* Left: Search Bar - SEARCHES CAMPAIGN NAMES ONLY */}
-          <div className="flex-1 max-w-xs">
-            <TextBoxComponent
-              placeholder="Search for a page or campaign"
-              showClearButton={true}
-              value={topSearchText}
-              input={handleTopSearchChange}
-              change={handleTopSearchChange}
-              cssClass="w-full"
-            />
-          </div>
 
-          {/* Right: User actions */}
+        <div className="bg-[#f8f9fa] border-b border-gray-300 px-6 py-4">
+        <div className="flex items-center justify-between">
+          {/* Left Side - View and Campaign Selectors */}
           <div className="flex items-center gap-3">
-            <ButtonComponent iconCss="e-icons e-appearance" cssClass="e-flat e-small" title="Appearance" />
-            <ButtonComponent iconCss="e-icons e-refresh" cssClass="e-flat e-small" title="Refresh" onClick={refetch} />
-            <ButtonComponent iconCss="e-icons e-help" cssClass="e-flat e-small" title="Help" />
+            {/* View Dropdown */}
             <div className="relative">
-              <ButtonComponent iconCss="e-icons e-notification" cssClass="e-flat e-small" title="Notifications">
-                <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
-              </ButtonComponent>
+              <button className="bg-white border border-gray-300 rounded px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2 min-w-[200px]">
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd"/>
+                </svg>
+                <div className="flex-1 text-left">
+                  <div className="text-xs text-gray-500">View (2 filters)</div>
+                  <div className="text-sm font-medium text-gray-900">All campaigns</div>
+                </div>
+              </button>
+              <div className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600"></div>
             </div>
-            <span className="text-xs text-gray-600">237-721-4676 Mockito</span>
-            <div className="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center text-sm">
-              A
+
+            {/* Campaign Dropdown */}
+            <div className="relative">
+              <button className="bg-white border border-gray-300 rounded px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2 min-w-[200px]">
+                <div className="flex-1 text-left">
+                  <div className="text-xs text-gray-500">Campaigns (2)</div>
+                  <div className="text-sm font-medium text-gray-900">Select a campaign</div>
+                </div>
+              </button>
             </div>
           </div>
+
+          {/* Right Side - Save Button */}
+          <button className="flex flex-col items-center gap-1 px-3 py-1 hover:bg-gray-200 rounded text-gray-600">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/>
+            </svg>
+            <span className="text-xs">Save</span>
+          </button>
         </div>
 
-        {/* Navigation Bar with Dropdowns */}
-        <div className="px-4 py-2 flex items-center gap-3 border-t border-gray-100">
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-gray-600">Back to</span>
-            <DropDownListComponent
-              dataSource={[{ text: 'All campaigns', value: 'all' }]}
-              fields={{ text: 'text', value: 'value' }}
-              value="all"
-              cssClass="w-32"
-            />
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-gray-600">View ({activeFilterCount} filter{activeFilterCount !== 1 ? 's' : ''})</span>
-            <DropDownListComponent
-              dataSource={[{ text: 'Search campaigns', value: 'search' }]}
-              fields={{ text: 'text', value: 'value' }}
-              value="search"
-              cssClass="w-40"
-            />
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-gray-600">Campaigns ({filteredCampaigns.length})</span>
-            <DropDownListComponent
-              dataSource={filteredCampaigns.map(c => ({ text: c.name, value: c.id }))}
-              fields={{ text: 'text', value: 'value' }}
-              placeholder="Select a campaign"
-              change={(e) => setSelectedCampaignId(e.value)}
-              value={selectedCampaignId}
-              cssClass="w-48"
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* ============================================ */}
-      {/* FILTER CHIPS BAR (Google Ads Style) */}
-      {/* ============================================ */}
-      <div className="bg-gray-50 border-b border-gray-200 px-4 py-2">
-        <div className="flex items-center gap-3 text-xs flex-wrap">
-          <span className="text-gray-700 font-medium">Filters</span>
-          
-          {/* Campaign Status Filter */}
-          <div className="flex items-center gap-2">
-            <span className="text-gray-600">Campaign status:</span>
-            {localFilters.campaignStatus.length > 0 ? (
-              localFilters.campaignStatus.map(status => (
-                <span key={status} className="inline-flex items-center gap-1 px-2 py-1 bg-white border border-gray-300 rounded text-gray-700">
-                  {status}
-                  <button 
-                    onClick={() => removeFilter('status', status)}
-                    className="text-gray-400 hover:text-gray-600"
-                  >
-                    ×
-                  </button>
-                </span>
-              ))
-            ) : (
-              <span className="text-gray-600">All</span>
-            )}
-          </div>
-
-          {/* Ad Group Status (static for now) */}
-          <div className="flex items-center gap-2">
-            <span className="text-gray-600">Ad group status:</span>
-            <span className="text-gray-600">Enabled, Paused</span>
-          </div>
-
-          {/* Campaign Type Filter */}
-          <div className="flex items-center gap-2">
-            <span className="text-gray-600">Campaign type:</span>
-            {localFilters.campaignType.length > 0 ? (
-              localFilters.campaignType.map(type => (
-                <span key={type} className="inline-flex items-center gap-1 px-2 py-1 bg-white border border-gray-300 rounded text-gray-700">
-                  {type}
-                  <button 
-                    onClick={() => removeFilter('type', type)}
-                    className="text-gray-400 hover:text-gray-600"
-                  >
-                    ×
-                  </button>
-                </span>
-              ))
-            ) : (
-              <span className="text-gray-600">Search</span>
-            )}
-          </div>
-
-          <ButtonComponent 
-            cssClass="e-link e-small text-blue-600"
-            onClick={() => setShowFilterDialog(true)}
-          >
+        {/* Filter Tags Row */}
+        <div className="flex items-center gap-3 mt-3">
+          <span className="text-sm text-gray-600">Filters</span>
+          <button className="bg-white border border-gray-300 rounded-full px-3 py-1 text-xs text-gray-700 hover:bg-gray-50 flex items-center gap-1">
+            Campaign status: Enabled, Paused
+          </button>
+          <button className="bg-white border border-gray-300 rounded-full px-3 py-1 text-xs text-gray-700 hover:bg-gray-50 flex items-center gap-1">
+            Ad group status: Enabled, Paused
+          </button>
+          <button className="text-sm text-gray-600 hover:text-gray-900">
             Add filter
-          </ButtonComponent>
+          </button>
         </div>
       </div>
-
       {/* ============================================ */}
       {/* MAIN CONTENT AREA */}
       {/* ============================================ */}

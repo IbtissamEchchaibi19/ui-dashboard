@@ -1,5 +1,5 @@
 import { useState } from 'react';
-
+import { LayoutGrid, Table, Download } from "lucide-react";
 // ──────────────────────────────────────────────────────────────
 // TypeScript Interfaces
 // ──────────────────────────────────────────────────────────────
@@ -102,52 +102,139 @@ export const  GoogleAdsRecommendations:  React.FC = () =>  {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="px-6 py-4">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <div className="flex items-center gap-2 text-sm text-gray-600 mb-1">
-                <i className="e-icons e-home" style={{ fontSize: '14px' }} />
-                <span>All campaigns</span>
-              </div>
-              <h1 className="text-2xl font-normal text-gray-900">Recommendations</h1>
+      <div className="bg-[#f8f9fa] border-b border-gray-300 px-6 py-4">
+        <div className="flex items-center justify-between">
+          {/* Left Side - View and Campaign Selectors */}
+          <div className="flex items-center gap-3">
+            {/* View Dropdown */}
+            <div className="relative">
+              <button className="bg-white border border-gray-300 rounded px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2 min-w-[200px]">
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd"/>
+                </svg>
+                <div className="flex-1 text-left">
+                  <div className="text-xs text-gray-500">View (2 filters)</div>
+                  <div className="text-sm font-medium text-gray-900">All campaigns</div>
+                </div>
+              </button>
+              <div className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600"></div>
             </div>
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => setView('cards')}
-                className={`p-2 rounded ${view === 'cards' ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-100'}`}
-                title="View cards"
-              >
-                <i className="e-icons e-grid-view" style={{ fontSize: '20px' }} />
-              </button>
-              <button
-                onClick={() => setView('list')}
-                className={`p-2 rounded ${view === 'list' ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-100'}`}
-                title="View list"
-              >
-                <i className="e-icons e-table" style={{ fontSize: '20px' }} />
-              </button>
-              <button className="p-2 text-gray-600 hover:bg-gray-100 rounded" title="Export">
-                <i className="e-icons e-export" style={{ fontSize: '20px' }} />
+
+            {/* Campaign Dropdown */}
+            <div className="relative">
+              <button className="bg-white border border-gray-300 rounded px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2 min-w-[200px]">
+                <div className="flex-1 text-left">
+                  <div className="text-xs text-gray-500">Campaigns (2)</div>
+                  <div className="text-sm font-medium text-gray-900">Select a campaign</div>
+                </div>
               </button>
             </div>
           </div>
 
-          {/* Tabs */}
-          <div className="flex gap-1 border-b border-gray-200">
-            <button className="px-4 py-3 text-sm font-medium border-b-2 border-blue-600 text-blue-600">
+          {/* Right Side - Save Button */}
+          <button className="flex flex-col items-center gap-1 px-3 py-1 hover:bg-gray-200 rounded text-gray-600">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/>
+            </svg>
+            <span className="text-xs">Save</span>
+          </button>
+        </div>
+
+        {/* Filter Tags Row */}
+        <div className="flex items-center gap-3 mt-3">
+          <span className="text-sm text-gray-600">Filters</span>
+          <button className="bg-white border border-gray-300 rounded-full px-3 py-1 text-xs text-gray-700 hover:bg-gray-50 flex items-center gap-1">
+            Campaign status: Enabled, Paused
+          </button>
+          <button className="bg-white border border-gray-300 rounded-full px-3 py-1 text-xs text-gray-700 hover:bg-gray-50 flex items-center gap-1">
+            Ad group status: Enabled, Paused
+          </button>
+          <button className="text-sm text-gray-600 hover:text-gray-900">
+            Add filter
+          </button>
+        </div>
+      </div>
+      <div className="bg-white border-b border-gray-200">
+      <div className="px-6 py-4">
+
+        {/* -------------------- TOP AREA -------------------- */}
+        <div className="flex items-center justify-between mb-6">
+          
+          {/* LEFT TEXT BLOCK */}
+          <div>
+            <div className="flex items-center gap-2 text-sm text-gray-600 mb-1">
+              <i className="e-icons e-home" style={{ fontSize: "14px" }} />
+              <span>All campaigns</span>
+            </div>
+            <h1 className="text-2xl font-normal text-gray-900">
               Recommendations
+            </h1>
+          </div>
+
+          {/* RIGHT BUTTONS */}
+          <div className="flex items-center gap-3">
+            {/* View cards */}
+            <button
+              onClick={() => setView("cards")}
+              className={`p-2 rounded transition ${
+                view === "cards"
+                  ? "bg-blue-50 text-blue-600"
+                  : "text-gray-600 hover:bg-gray-100"
+              }`}
+              title="View cards"
+            >
+              <LayoutGrid size={20} />
+               <span className="text-xs">View cards</span>
             </button>
-            <button className="px-4 py-3 text-sm font-medium border-b-2 border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300 flex items-center gap-1">
-              Investment strategy
-              <span className="bg-blue-600 text-white text-xs px-1.5 py-0.5 rounded">NEW</span>
+
+            {/* View list */}
+            <button
+              onClick={() => setView("list")}
+              className={`p-2 rounded transition ${
+                view === "list"
+                  ? "bg-blue-50 text-blue-600"
+                  : "text-gray-600 hover:bg-gray-100"
+              }`}
+              title="View list"
+            >
+              <Table size={20} />
+              <span  className="text-xs">View list</span>
             </button>
-            <button className="px-4 py-3 text-sm font-medium border-b-2 border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300">
-              Auto-apply settings
+
+            {/* Export */}
+            <button
+              className="p-2 text-gray-600 hover:bg-gray-100 rounded transition"
+              title="Export"
+            >
+              <Download size={20} />
+              <span  className="text-xs">Export</span>
             </button>
           </div>
         </div>
+
+        {/* -------------------- TABS -------------------- */}
+        <div className="flex gap-1 border-b border-gray-200">
+
+          {/* Active tab */}
+          <button className="px-4 py-3 text-sm font-medium border-b-2 border-blue-600 text-blue-600">
+            Recommendations
+          </button>
+
+          {/* Investment Strategy */}
+          <button className="px-4 py-3 text-sm font-medium border-b-2 border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300 flex items-center gap-1">
+            Investment strategy
+            <span className="bg-blue-600 text-white text-xs px-1.5 py-0.5 rounded">
+              NEW
+            </span>
+          </button>
+
+          {/* Auto Apply */}
+          <button className="px-4 py-3 text-sm font-medium border-b-2 border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300">
+            Auto-apply settings
+          </button>
+        </div>
       </div>
+    </div>
 
       {/* Optimization Score Section */}
       <div className="bg-white mx-6 mt-6 rounded-lg border border-gray-200 p-6">
