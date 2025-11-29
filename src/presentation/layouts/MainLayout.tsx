@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { PageHeader } from '@presentation/components/PageHeader';
+import { Plus, Megaphone, Trophy, Wrench, CreditCard, Settings } from 'lucide-react';
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -16,6 +17,7 @@ interface MenuItem {
 export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [isSidebarVisible, setIsSidebarVisible] = useState<boolean>(true);
   const [expandedSections, setExpandedSections] = useState<{ [key: string]: boolean }>({
     campaigns: false,
     insights: false,
@@ -23,69 +25,75 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     audiences: false,
   });
 
-const menuItems: MenuItem[] = [
-  { id: 'overview', text: 'Overview', route: '/Overview' },
-  { id: 'recommendations', text: 'Recommendations', route: '/recommendations' },
+  const menuItems: MenuItem[] = [
+    { id: 'overview', text: 'Overview', route: '/Overview' },
+    { id: 'recommendations', text: 'Recommendations', route: '/recommendations' },
 
-  {
-    id: 'insights',
-    text: 'Insights and reports',
-    route: '#',
-    subItems: [
-      { id: 'insights-main', text: 'Insights', route: '/insights' },
-      { id: 'auction-insights', text: 'Auction insights', route: '/auction-insights' },
-      { id: 'search-terms', text: 'Search terms', route: '/search-terms' },
-      { id: 'when-where', text: 'When and where ads showed', route: '/when-where-ads-showed' },
-      // { id: 'channel-performance', text: 'Channel performance', route: '/channel-performance' },
-      { id: 'landing-pages', text: 'Landing pages', route: '/landing-pages' },
-      { id: 'stores', text: 'Stores', route: '/stores' },
-      { id: 'report-editor', text: 'Report editor', route: '/report-editor' },
-      // { id: 'dashboards', text: 'Dashboards', route: '/dashboards' },
-    ]
-  },
+    {
+      id: 'insights',
+      text: 'Insights and reports',
+      route: '#',
+      subItems: [
+        { id: 'insights-main', text: 'Insights', route: '/insights' },
+        { id: 'auction-insights', text: 'Auction insights', route: '/auction-insights' },
+        { id: 'search-terms', text: 'Search terms', route: '/search-terms' },
+        { id: 'when-where', text: 'When and where ads showed', route: '/when-where-ads-showed' },
+        { id: 'landing-pages', text: 'Landing pages', route: '/landing-pages' },
+        { id: 'stores', text: 'Stores', route: '/stores' },
+        { id: 'report-editor', text: 'Report editor', route: '/report-editor' },
+      ]
+    },
 
-  {
-    id: 'campaigns',
-    text: 'Campaigns',
-    route: '#',
-    subItems: [
-      { id: 'campaigns-main', text: 'Campaigns', route: '/campaigns' },
-      { id: 'adgroups', text: 'Ad groups', route: '/AdGroupsPage' },
-      { id: 'ads', text: 'Ads', route: '/Adspage' },
-      { id: 'assetgroups', text: 'Asset groups', route: '/AssetGroup' },
-      { id: 'experiments', text: 'Experiments', route: '/experiments' },
-      { id: 'campaigngroups', text: 'Campaign groups', route: '/campaign-groups' },
-    ]
-  },
+    {
+      id: 'campaigns',
+      text: 'Campaigns',
+      route: '#',
+      subItems: [
+        { id: 'campaigns-main', text: 'Campaigns', route: '/campaigns' },
+        { id: 'adgroups', text: 'Ad groups', route: '/AdGroupsPage' },
+        { id: 'ads', text: 'Ads', route: '/Adspage' },
+        { id: 'assetgroups', text: 'Asset groups', route: '/AssetGroup' },
+        { id: 'experiments', text: 'Experiments', route: '/experiments' },
+        { id: 'campaigngroups', text: 'Campaign groups', route: '/campaign-groups' },
+      ]
+    },
 
-  {
-    id: 'assets',
-    text: 'Assets',
-    route: '#',
-    subItems: [
-      { id: 'asset', text: 'Asset', route: '/Asset' },
-    ]
-  },
+    {
+      id: 'assets',
+      text: 'Assets',
+      route: '#',
+      subItems: [
+        { id: 'asset', text: 'Asset', route: '/Asset' },
+      ]
+    },
 
-  {
-    id: 'audiences',
-    text: 'Audiences, keywords, and content',
-    route: '#',
-    subItems: [
-      { id: 'keywords', text: 'Keywords', route: '/keywords' },
-      { id: 'audiences-main', text: 'Audiences', route: '/audiences' },
-      { id: 'locations', text: 'Locations', route: '/locations' },
-      { id: 'content', text: 'Content', route: '/content' },
-      { id: 'ad-schedule', text: 'Ad schedule', route: '/ad-schedule' },
-      { id: 'advanced-bid', text: 'Advanced bid adjustments', route: '/advanced-bid-adjustments' },
-    ]
-  },
+    {
+      id: 'audiences',
+      text: 'Audiences, keywords, and content',
+      route: '#',
+      subItems: [
+        { id: 'keywords', text: 'Keywords', route: '/keywords' },
+        { id: 'audiences-main', text: 'Audiences', route: '/audiences' },
+        { id: 'locations', text: 'Locations', route: '/locations' },
+        { id: 'content', text: 'Content', route: '/content' },
+        { id: 'ad-schedule', text: 'Ad schedule', route: '/ad-schedule' },
+        { id: 'advanced-bid', text: 'Advanced bid adjustments', route: '/advanced-bid-adjustments' },
+      ]
+    },
 
-  { id: 'history', text: 'Change history', route: '/change-history' },
-];
+    { id: 'history', text: 'Change history', route: '/change-history' },
+  ];
 
+  const iconSidebarItems = [
+    { id: 'create', text: 'Create', icon: Plus },
+    { id: 'campaigns-icon', text: 'Campaigns', icon: Megaphone },
+    { id: 'goals', text: 'Goals', icon: Trophy },
+    { id: 'tools', text: 'Tools', icon: Wrench },
+    { id: 'billing', text: 'Billing', icon: CreditCard },
+    { id: 'admin', text: 'Admin', icon: Settings },
+  ];
 
-  const toggleSection = (sectionId: string) => {
+  const toggleSection = (sectionId: string): void => {
     setExpandedSections(prev => ({
       ...prev,
       [sectionId]: !prev[sectionId]
@@ -111,81 +119,112 @@ const menuItems: MenuItem[] = [
     return false;
   };
 
+  const toggleSidebar = (): void => {
+    setIsSidebarVisible(prev => !prev);
+  };
+
   return (
-    <div className="flex h-screen bg-gray-50">
-      {/* Sidebar */}
-      <aside className="w-80 bg-gray-50 border-r border-gray-200 flex flex-col overflow-y-auto">
-        {/* Navigation Menu */}
-        <nav className="flex-1 py-4 px-3">
-          {menuItems.map((item) => {
-            const hasSubItems = item.subItems && item.subItems.length > 0;
-            const isExpanded = expandedSections[item.id];
-            const isActive = item.route !== '#' && isActiveRoute(item.route);
-            const hasActiveChild = isParentActive(item);
-
+    <div className="flex flex-col h-screen bg-white">
+      {/* Header - Full Width at Top */}
+      <PageHeader onToggleSidebar={toggleSidebar} />
+      
+      {/* Content Area Below Header */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* Icon Sidebar - Always visible */}
+        <aside className="w-20 bg-gray-50 border-r border-gray-200 flex flex-col items-center py-4 gap-2 shrink-0">
+          {iconSidebarItems.map((item) => {
+            const Icon = item.icon;
+            const isHighlighted = item.id === 'campaigns-icon';
+            
             return (
-              <div key={item.id} className="mb-1">
-                {/* Main Menu Item */}
-                <button
-                  onClick={() => handleMenuClick(item)}
-                  className={`w-full flex items-center justify-between px-4 py-3 text-left rounded-full transition-colors ${
-                    isActive
-                      ? 'bg-blue-600 text-white'
-                      : hasActiveChild
-                      ? 'bg-white text-gray-900'
-                      : 'text-gray-900 hover:bg-gray-100'
-                  }`}
-                >
-                  <span className="text-sm font-medium">{item.text}</span>
-                  {hasSubItems && (
-                    <svg
-                      className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  )}
-                </button>
-
-                {/* Sub Menu Items */}
-                {hasSubItems && isExpanded && (
-                  <div className="mt-1 ml-2 bg-white rounded-2xl shadow-sm overflow-hidden">
-                    {item.subItems!.map((subItem) => {
-                      const isSubActive = isActiveRoute(subItem.route);
-                      return (
-                        <button
-                          key={subItem.id}
-                          onClick={() => navigate(subItem.route)}
-                          className={`w-full flex items-center px-6 py-3 text-left transition-colors ${
-                            isSubActive
-                              ? 'bg-blue-50 text-blue-600 font-medium'
-                              : 'text-gray-700 hover:bg-gray-50'
-                          }`}
-                        >
-                          <span className="text-sm">{subItem.text}</span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
+              <button
+                key={item.id}
+                className={`w-16 flex flex-col items-center justify-center py-3 px-2 rounded hover:bg-gray-200 transition-colors ${
+                  isHighlighted ? 'bg-blue-100' : ''
+                }`}
+              >
+                <Icon className={`w-5 h-5 mb-1 ${isHighlighted ? 'text-blue-600' : 'text-gray-600'}`} />
+                <span className={`text-[11px] text-center ${isHighlighted ? 'text-blue-600 font-medium' : 'text-gray-700'}`}>
+                  {item.text}
+                </span>
+              </button>
             );
           })}
-        </nav>
-      </aside>
+        </aside>
 
-      {/* Main Content */}
-      <main className="flex-1 flex flex-col overflow-hidden">
-        <PageHeader />
-        <div className="flex-1 overflow-y-auto">
+        {/* Main Navigation Sidebar */}
+        {isSidebarVisible && (
+          <aside className="w-80 bg-gray-50 border-r border-gray-200 flex flex-col overflow-y-auto shrink-0">
+            {/* Navigation Menu */}
+            <nav className="flex-1 py-4 px-3">
+              {menuItems.map((item) => {
+                const hasSubItems = item.subItems && item.subItems.length > 0;
+                const isExpanded = expandedSections[item.id];
+                const isActive = item.route !== '#' && isActiveRoute(item.route);
+                const hasActiveChild = isParentActive(item);
+
+                return (
+                  <div key={item.id} className="mb-1">
+                    {/* Main Menu Item */}
+                    <button
+                      onClick={() => handleMenuClick(item)}
+                      className={`w-full flex items-center justify-between px-4 py-3 text-left rounded-full transition-colors ${
+                        isActive
+                          ? 'bg-blue-600 text-white'
+                          : hasActiveChild
+                          ? 'bg-white text-gray-900'
+                          : 'text-gray-900 hover:bg-gray-100'
+                      }`}
+                    >
+                      <span className="text-sm font-medium">{item.text}</span>
+                      {hasSubItems && (
+                        <svg
+                          className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      )}
+                    </button>
+
+                    {/* Sub Menu Items */}
+                    {hasSubItems && isExpanded && (
+                      <div className="mt-1 ml-2 bg-white rounded-2xl shadow-sm overflow-hidden">
+                        {item.subItems!.map((subItem) => {
+                          const isSubActive = isActiveRoute(subItem.route);
+                          return (
+                            <button
+                              key={subItem.id}
+                              onClick={() => navigate(subItem.route)}
+                              className={`w-full flex items-center px-6 py-3 text-left transition-colors ${
+                                isSubActive
+                                  ? 'bg-blue-50 text-blue-600 font-medium'
+                                  : 'text-gray-700 hover:bg-gray-50'
+                              }`}
+                            >
+                              <span className="text-sm">{subItem.text}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </nav>
+          </aside>
+        )}
+
+        {/* Main Content */}
+        <main className="flex-1 overflow-y-auto">
           {children}
-        </div>
-      </main>
+        </main>
+      </div>
     </div>
   );
 };
