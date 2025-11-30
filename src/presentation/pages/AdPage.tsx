@@ -566,14 +566,17 @@ export const AdsPage: React.FC = () => {
           {/* Date Range Selector */}
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-600">{formatDisplay()}</span>
-            <DropDownListComponent
-              dataSource={dateRangePresets}
-              fields={{ text: 'text', value: 'value' }}
-              value={preset}
-              change={handleDateRangeChange}
-              placeholder="Select date range"
-              cssClass="w-44"
-            />
+            <div className="px-3 py-2 border border-gray-300 rounded text-sm bg-white">
+                          <DropDownListComponent
+                            dataSource={dateRangePresets}
+                            fields={{ text: 'text', value: 'value' }}
+                            value={preset}
+                            change={(e) => setPreset(e.value as any)}
+                            placeholder={formatDisplay()}
+                            floatLabelType="Never"
+                            cssClass="w-48"
+                          />
+                        </div>
             <ButtonComponent 
               cssClass="e-link e-small text-blue-600"
               onClick={() => setPreset('last30days')}

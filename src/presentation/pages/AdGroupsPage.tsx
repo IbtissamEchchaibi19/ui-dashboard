@@ -43,11 +43,6 @@ const COLUMN_CONFIG: { key: AdGroupMetricColumn; label: string; align: 'left' | 
 ];
 
 export const AdGroupsPage: React.FC = () => {
-  // ============================================
-  // STATE MANAGEMENT
-  // ============================================
-  
-  // Backend filters state (sent to hooks)
   const [backendFilters, setBackendFilters] = useState<any>({});
   
   // Local filters state (UI state before applying)
@@ -99,11 +94,6 @@ export const AdGroupsPage: React.FC = () => {
     dateRange
   );
 
-  // ============================================
-  // EFFECTS
-  // ============================================
-
-  // Update time series when date range changes
   useEffect(() => {
     updateTimeSeriesDateRange(dateRange);
   }, [dateRange, updateTimeSeriesDateRange]);
@@ -606,14 +596,17 @@ export const AdGroupsPage: React.FC = () => {
           
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-600">{formatDisplay()}</span>
-            <DropDownListComponent
-              dataSource={dateRangePresets}
-              fields={{ text: 'text', value: 'value' }}
-              value={preset}
-              change={handleDateRangeChange}
-              placeholder="Select date range"
-              cssClass="w-44"
-            />
+          <div className="px-3 py-2 border border-gray-300 rounded text-sm bg-white">
+                        <DropDownListComponent
+                          dataSource={dateRangePresets}
+                          fields={{ text: 'text', value: 'value' }}
+                          value={preset}
+                          change={(e) => setPreset(e.value as any)}
+                          placeholder={formatDisplay()}
+                          floatLabelType="Never"
+                          cssClass="w-48"
+                        />
+                      </div>
             <ButtonComponent iconCss="e-icons e-chevron-left" cssClass="e-flat e-small" />
             <ButtonComponent iconCss="e-icons e-chevron-right" cssClass="e-flat e-small" />
             <ButtonComponent 
