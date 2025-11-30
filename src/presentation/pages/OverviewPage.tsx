@@ -12,14 +12,7 @@ import {
   Tooltip,
   SplineSeries
 } from '@syncfusion/ej2-react-charts';
-import { DropDownListComponent } from '@syncfusion/ej2-react-dropdowns';
-import { ButtonComponent, ChipListComponent } from '@syncfusion/ej2-react-buttons';
-// import { ProgressBarComponent } from '@syncfusion/ej2-react-progressbar';
-import { TabComponent, TabItemDirective, TabItemsDirective } from '@syncfusion/ej2-react-navigations';
-import { GridComponent, ColumnsDirective, ColumnDirective } from '@syncfusion/ej2-react-grids';
-import { DateRangePickerComponent } from '@syncfusion/ej2-react-calendars';
-import { CheckBoxComponent, RadioButtonComponent } from '@syncfusion/ej2-react-buttons';
-import { AccordionComponent, AccordionItemDirective, AccordionItemsDirective } from '@syncfusion/ej2-react-navigations';
+import { CheckBoxComponent } from '@syncfusion/ej2-react-buttons';
 
 // Icons as SVG components
 const DownloadIcon = () => (
@@ -261,9 +254,6 @@ export const OverviewPage: React.FC = () => {
 
   return (
     <div className="bg-white min-h-screen font-['Google_Sans','Roboto',sans-serif]">
-      {/* Top Header Bar */}
-     {/* Top Header Bar */}
-      {/* Filter Bar */}
       <div className="bg-[#f8f9fa] border-b border-gray-300 px-6 py-4">
         <div className="flex items-center justify-between">
           {/* Left Side - View and Campaign Selectors */}

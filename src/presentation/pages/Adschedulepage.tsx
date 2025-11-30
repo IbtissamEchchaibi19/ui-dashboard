@@ -1,35 +1,7 @@
 import { useState } from 'react';
 import { ChevronDown, Filter, Download, Maximize2, Plus, Edit2 } from 'lucide-react';
 
-// ──────────────────────────────────────────────────────────────
-// TypeScript Interfaces
-// ──────────────────────────────────────────────────────────────
-interface AdSchedule {
-  id: string;
-  dayAndTime: string;
-  campaign: string;
-  bidAdj: string;
-  impressions: number;
-  interactions: number;
-  interactionRate: string;
-  avgCost: string;
-  cost: string;
-  convRate: string;
-  conversions: number;
-  costPerConv: string;
-}
-
-// ──────────────────────────────────────────────────────────────
-// Sample Data
-// ──────────────────────────────────────────────────────────────
-const adScheduleData: AdSchedule[] = [];
-
-// ──────────────────────────────────────────────────────────────
-// Main Component
-// ──────────────────────────────────────────────────────────────
 export const AdSchedulePage: React.FC = () => {
-  const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
-
   return (
     <div className="min-h-screen bg-gray-50">
        <div className="bg-[#f8f9fa] border-b border-gray-300 px-6 py-4">

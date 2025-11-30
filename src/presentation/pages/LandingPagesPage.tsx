@@ -1,99 +1,9 @@
 import { useState } from 'react';
 import { Maximize2 } from 'lucide-react';
 import DataTable, { Column } from '@presentation/components/DataTable';
+import {LandingPage,landingPagesData} from '@infrastructure/mock-data'
 
-// ──────────────────────────────────────────────────────────────
-// TypeScript Interfaces
-// ──────────────────────────────────────────────────────────────
-interface LandingPage {
-  id: string;
-  landingPage: string;
-  selectedBy: string;
-  mobileSpeedScore: string;
-  mobileFriendlyClickRate: string;
-  validAmpClickRate: string;
-  clicks: number;
-  impressions: number;
-  ctr: string;
-  avgCpc: string;
-  cost: string;
-  [key: string]: any; // Add this line
-}
 
-// ──────────────────────────────────────────────────────────────
-// Sample Data
-// ──────────────────────────────────────────────────────────────
-const landingPagesData: LandingPage[] = [
-  {
-    id: '1',
-    landingPage: 'https://aiinfoxtech.com/',
-    selectedBy: 'Advertiser selected',
-    mobileSpeedScore: '—',
-    mobileFriendlyClickRate: '—',
-    validAmpClickRate: '—',
-    clicks: 137,
-    impressions: 1929,
-    ctr: '7.10%',
-    avgCpc: '₹8.79',
-    cost: '₹1,203.77'
-  },
-  {
-    id: '2',
-    landingPage: 'https://aiinfoxtech.com/programs/mobile-app-development',
-    selectedBy: 'Advertiser selected',
-    mobileSpeedScore: '—',
-    mobileFriendlyClickRate: '—',
-    validAmpClickRate: '—',
-    clicks: 44,
-    impressions: 369,
-    ctr: '11.92%',
-    avgCpc: '₹2.40',
-    cost: '₹105.47'
-  },
-  {
-    id: '3',
-    landingPage: 'https://aiinfoxtech.com/contact',
-    selectedBy: 'Advertiser selected',
-    mobileSpeedScore: '—',
-    mobileFriendlyClickRate: '—',
-    validAmpClickRate: '—',
-    clicks: 5,
-    impressions: 282,
-    ctr: '1.77%',
-    avgCpc: '₹2.01',
-    cost: '₹10.07'
-  },
-  {
-    id: '4',
-    landingPage: 'https://aiinfoxtech.com/',
-    selectedBy: 'Automatically selected',
-    mobileSpeedScore: '—',
-    mobileFriendlyClickRate: '—',
-    validAmpClickRate: '—',
-    clicks: 4,
-    impressions: 45,
-    ctr: '8.89%',
-    avgCpc: '₹2.32',
-    cost: '₹9.29'
-  },
-  {
-    id: '5',
-    landingPage: 'https://aiinfoxtech.com/programs/generative-ai-training',
-    selectedBy: 'Advertiser selected',
-    mobileSpeedScore: '—',
-    mobileFriendlyClickRate: '—',
-    validAmpClickRate: '—',
-    clicks: 3,
-    impressions: 336,
-    ctr: '0.89%',
-    avgCpc: '₹3.06',
-    cost: '₹9.18'
-  }
-];
-
-// ──────────────────────────────────────────────────────────────
-// Column Definitions
-// ──────────────────────────────────────────────────────────────
 const landingPagesColumns: Column[] = [
   {
     key: 'landingPage',
@@ -171,10 +81,6 @@ const landingPagesColumns: Column[] = [
     category: 'Performance'
   }
 ];
-
-// ──────────────────────────────────────────────────────────────
-// Calculate Totals
-// ──────────────────────────────────────────────────────────────
 const calculateTotals = (data: LandingPage[], column: Column) => {
   switch (column.key) {
     case 'landingPage':
@@ -208,16 +114,6 @@ const calculateTotals = (data: LandingPage[], column: Column) => {
   }
 };
 
-// Chart data
-const chartDataPoints = [
-  { x: 100, y: 250 }, { x: 200, y: 180 }, { x: 300, y: 320 }, { x: 400, y: 315 },
-  { x: 500, y: 320 }, { x: 600, y: 310 }, { x: 700, y: 305 }, { x: 800, y: 350 },
-  { x: 900, y: 370 }, { x: 1000, y: 320 }, { x: 1100, y: 340 }, { x: 1200, y: 325 }
-];
-
-// ──────────────────────────────────────────────────────────────
-// Main Component
-// ──────────────────────────────────────────────────────────────
 export const LandingPagesPage:  React.FC =() =>{
   const [selectedTab, setSelectedTab] = useState<'landing' | 'expanded'>('landing');
   const [selectedMetric, setSelectedMetric] = useState('clicks');

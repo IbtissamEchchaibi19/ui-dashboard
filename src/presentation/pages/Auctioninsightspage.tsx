@@ -1,31 +1,13 @@
 import { useState } from 'react';
 import { ChevronDown, Filter, Download, Maximize2, HelpCircle } from 'lucide-react';
+import {auctionInsightsData} from '@infrastructure/mock-data'
 
-// ──────────────────────────────────────────────────────────────
-// TypeScript Interfaces
-// ──────────────────────────────────────────────────────────────
-interface AuctionInsight {
-  id: string;
-  displayUrlDomain: string;
-  impressionShare: string;
-  overlapRate: string;
-  positionAboveRate: string;
-  topOfPageRate: string;
-  absTopOfPageRate: string;
-  outrankingShare: string;
-}
-
-// ──────────────────────────────────────────────────────────────
-// Sample Data
-// ──────────────────────────────────────────────────────────────
-const auctionInsightsData: AuctionInsight[] = [];
 
 // ──────────────────────────────────────────────────────────────
 // Main Component
 // ──────────────────────────────────────────────────────────────
 export const AuctionInsightsPage: React.FC = () => {
   const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
-  const [searchFilter, setSearchFilter] = useState('search');
 
   const toggleRowSelection = (id: string) => {
     setSelectedRows(prev => {

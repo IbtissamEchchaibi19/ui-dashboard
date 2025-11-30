@@ -1,519 +1,20 @@
 import { useState } from 'react';
-import { Maximize2 } from 'lucide-react';
-import DataTable, { Column } from '@presentation/components/DataTable';
+import { ChevronDown, ChevronUp, Filter, Download, Maximize2 } from 'lucide-react';
+import {devicesData,whenAdsShowedData,matchedLocationsData} from '@infrastructure/mock-data'
 
-// ──────────────────────────────────────────────────────────────
-// TypeScript Interfaces
-// ──────────────────────────────────────────────────────────────
-interface DeviceData {
-  id: string;
-  device: string;
-  level: string;
-  addedTo: string;
-  bidAdj: string;
-  adGroupBidAdj: string;
-  impressions: number;
-  interactions: number;
-  interactionRate: string;
-  avgCost: string;
-  cost: string;
-  convRate: string;
-  conversions: string;
-  costPerConv: string;
-  [key: string]: any;
-}
-
-interface WhenAdsShowedData {
-  id: string;
-  day: string;
-  hour: string;
-  campaign: string;
-  impressions: number;
-  interactions: number;
-  interactionRate: string;
-  avgCost: string;
-  cost: string;
-  convRate: string;
-  conversions: string;
-  costPerConv: string;
-  [key: string]: any;
-}
-
-interface MatchedLocationData {
-  id: string;
-  matchedLocation: string;
-  clicks: number;
-  impressions: number;
-  ctr: string;
-  avgCpc: string;
-  cost: string;
-  convRate: string;
-  conversions: string;
-  costPerConv: string;
-  [key: string]: any;
-}
-
-// ──────────────────────────────────────────────────────────────
-// Sample Data
-// ──────────────────────────────────────────────────────────────
-const devicesData: DeviceData[] = [
-  {
-    id: '1',
-    device: 'Mobile phones',
-    level: 'Campaign',
-    addedTo: 'Search 9th Oct',
-    bidAdj: '—',
-    adGroupBidAdj: 'None',
-    impressions: 1810,
-    interactions: 233,
-    interactionRate: '12.87%',
-    avgCost: '₹7.18',
-    cost: '₹1,672.12',
-    convRate: '6.44%',
-    conversions: '15.00',
-    costPerConv: '₹111.48'
-  },
-  {
-    id: '2',
-    device: 'Computers',
-    level: 'Campaign',
-    addedTo: 'Search 9th Oct',
-    bidAdj: '—',
-    adGroupBidAdj: 'None',
-    impressions: 167,
-    interactions: 4,
-    interactionRate: '2.40%',
-    avgCost: '₹4.59',
-    cost: '₹18.36',
-    convRate: '0.00%',
-    conversions: '0.00',
-    costPerConv: '₹0.00'
-  },
-  {
-    id: '3',
-    device: 'Tablets',
-    level: 'Campaign',
-    addedTo: 'Search 9th Oct',
-    bidAdj: '—',
-    adGroupBidAdj: 'None',
-    impressions: 17,
-    interactions: 2,
-    interactionRate: '11.76%',
-    avgCost: '₹2.54',
-    cost: '₹5.08',
-    convRate: '0.00%',
-    conversions: '0.00',
-    costPerConv: '₹0.00'
-  }
-];
-
-const whenAdsShowedData: WhenAdsShowedData[] = [
-  {
-    id: '1',
-    day: 'Sunday',
-    hour: '12 AM – 1 AM',
-    campaign: 'Search 9th Oct',
-    impressions: 224,
-    interactions: 13,
-    interactionRate: '5.80%',
-    avgCost: '₹7.78',
-    cost: '₹101.14',
-    convRate: '15.38%',
-    conversions: '2.00',
-    costPerConv: '₹50.57'
-  },
-  {
-    id: '2',
-    day: 'Monday',
-    hour: '12 AM – 1 AM',
-    campaign: 'Search 9th Oct',
-    impressions: 111,
-    interactions: 13,
-    interactionRate: '11.71%',
-    avgCost: '₹6.77',
-    cost: '₹88.07',
-    convRate: '7.69%',
-    conversions: '1.00',
-    costPerConv: '₹88.07'
-  },
-  {
-    id: '3',
-    day: 'Sunday',
-    hour: '1 AM – 2 AM',
-    campaign: 'Search 9th Oct',
-    impressions: 72,
-    interactions: 10,
-    interactionRate: '13.89%',
-    avgCost: '₹4.28',
-    cost: '₹42.82',
-    convRate: '0.00%',
-    conversions: '0.00',
-    costPerConv: '₹0.00'
-  }
-];
-
-const matchedLocationsData: MatchedLocationData[] = [
-  {
-    id: '1',
-    matchedLocation: 'India',
-    clicks: 239,
-    impressions: 1994,
-    ctr: '11.99%',
-    avgCpc: '₹7.09',
-    cost: '₹1,695.56',
-    convRate: '6.28%',
-    conversions: '15.00',
-    costPerConv: '₹113.04'
-  }
-];
-
-// ──────────────────────────────────────────────────────────────
-// Column Definitions
-// ──────────────────────────────────────────────────────────────
-const devicesColumns: Column[] = [
-  {
-    key: 'device',
-    label: 'Device',
-    align: 'left',
-    sticky: true,
-    sortable: true,
-    category: 'Device Info'
-  },
-  {
-    key: 'level',
-    label: 'Level',
-    align: 'left',
-    category: 'Device Info'
-  },
-  {
-    key: 'addedTo',
-    label: 'Added to',
-    align: 'left',
-    category: 'Device Info',
-    render: (value) => <a href="#" className="text-blue-600 hover:underline">{value}</a>
-  },
-  {
-    key: 'bidAdj',
-    label: 'Bid adj.',
-    align: 'left',
-    category: 'Device Info'
-  },
-  {
-    key: 'adGroupBidAdj',
-    label: 'Ad group bid adj.',
-    align: 'left',
-    category: 'Device Info'
-  },
-  {
-    key: 'impressions',
-    label: 'Impr.',
-    align: 'right',
-    sortable: true,
-    category: 'Performance'
-  },
-  {
-    key: 'interactions',
-    label: 'Interacti.',
-    align: 'right',
-    sortable: true,
-    category: 'Performance',
-    render: (value) => value > 0 ? (
-      <div>
-        {value}
-        <div className="text-xs text-gray-500">clicks</div>
-      </div>
-    ) : value
-  },
-  {
-    key: 'interactionRate',
-    label: 'Interaction rate',
-    align: 'right',
-    sortable: true,
-    category: 'Performance'
-  },
-  {
-    key: 'avgCost',
-    label: 'Avg. cost',
-    align: 'right',
-    sortable: true,
-    category: 'Performance'
-  },
-  {
-    key: 'cost',
-    label: 'Cost',
-    align: 'right',
-    sortable: true,
-    category: 'Performance'
-  },
-  {
-    key: 'convRate',
-    label: 'Conv. rate',
-    align: 'right',
-    category: 'Conversions'
-  },
-  {
-    key: 'conversions',
-    label: 'Conversions',
-    align: 'right',
-    category: 'Conversions'
-  },
-  {
-    key: 'costPerConv',
-    label: 'Cost / conv.',
-    align: 'right',
-    category: 'Conversions'
-  }
-];
-
-const whenColumns: Column[] = [
-  {
-    key: 'day',
-    label: 'Day',
-    align: 'left',
-    sticky: true,
-    sortable: true,
-    category: 'Time Info'
-  },
-  {
-    key: 'hour',
-    label: 'Hour',
-    align: 'left',
-    category: 'Time Info'
-  },
-  {
-    key: 'campaign',
-    label: 'Campaign',
-    align: 'left',
-    category: 'Time Info',
-    render: (value) => <a href="#" className="text-blue-600 hover:underline">{value}</a>
-  },
-  {
-    key: 'impressions',
-    label: 'Impr.',
-    align: 'right',
-    sortable: true,
-    category: 'Performance'
-  },
-  {
-    key: 'interactions',
-    label: 'Interaction',
-    align: 'right',
-    sortable: true,
-    category: 'Performance',
-    render: (value) => (
-      <div>
-        {value}
-        <div className="text-xs text-gray-500">clicks</div>
-      </div>
-    )
-  },
-  {
-    key: 'interactionRate',
-    label: 'Interaction rate',
-    align: 'right',
-    sortable: true,
-    category: 'Performance'
-  },
-  {
-    key: 'avgCost',
-    label: 'Avg. cost',
-    align: 'right',
-    sortable: true,
-    category: 'Performance'
-  },
-  {
-    key: 'cost',
-    label: 'Cost',
-    align: 'right',
-    sortable: true,
-    category: 'Performance'
-  },
-  {
-    key: 'convRate',
-    label: 'Conv. rate',
-    align: 'right',
-    category: 'Conversions'
-  },
-  {
-    key: 'conversions',
-    label: 'Conversions',
-    align: 'right',
-    category: 'Conversions'
-  },
-  {
-    key: 'costPerConv',
-    label: 'Cost / conv.',
-    align: 'right',
-    category: 'Conversions'
-  }
-];
-
-const matchedColumns: Column[] = [
-  {
-    key: 'matchedLocation',
-    label: 'Matched location',
-    align: 'left',
-    sticky: true,
-    sortable: true,
-    category: 'Location',
-    render: (value) => <a href="#" className="text-blue-600 hover:underline">{value}</a>
-  },
-  {
-    key: 'clicks',
-    label: 'Clicks',
-    align: 'right',
-    sortable: true,
-    category: 'Performance'
-  },
-  {
-    key: 'impressions',
-    label: 'Impr.',
-    align: 'right',
-    sortable: true,
-    category: 'Performance'
-  },
-  {
-    key: 'ctr',
-    label: 'CTR',
-    align: 'right',
-    sortable: true,
-    category: 'Performance'
-  },
-  {
-    key: 'avgCpc',
-    label: 'Avg. CPC',
-    align: 'right',
-    sortable: true,
-    category: 'Performance'
-  },
-  {
-    key: 'cost',
-    label: 'Cost',
-    align: 'right',
-    sortable: true,
-    category: 'Performance'
-  },
-  {
-    key: 'convRate',
-    label: 'Conv. rate',
-    align: 'right',
-    category: 'Conversions'
-  },
-  {
-    key: 'conversions',
-    label: 'Conversions',
-    align: 'right',
-    category: 'Conversions'
-  },
-  {
-    key: 'costPerConv',
-    label: 'Cost / conv.',
-    align: 'right',
-    category: 'Conversions'
-  }
-];
-
-// ──────────────────────────────────────────────────────────────
-// Calculate Totals Functions
-// ──────────────────────────────────────────────────────────────
-const calculateDeviceTotals = (data: DeviceData[], column: Column) => {
-  switch (column.key) {
-    case 'impressions':
-      return data.reduce((sum, row) => sum + row.impressions, 0).toLocaleString();
-    case 'interactions':
-      const total = data.reduce((sum, row) => sum + row.interactions, 0);
-      return (
-        <div>
-          {total}
-          <div className="text-xs text-gray-500">clicks</div>
-        </div>
-      );
-    case 'interactionRate':
-      const totalImp = data.reduce((sum, row) => sum + row.impressions, 0);
-      const totalInt = data.reduce((sum, row) => sum + row.interactions, 0);
-      return totalImp > 0 ? `${((totalInt / totalImp) * 100).toFixed(2)}%` : '0.00%';
-    case 'avgCost':
-      const totalCost = data.reduce((sum, row) => sum + parseFloat(row.cost.replace(/[₹,]/g, '')), 0);
-      const totalInter = data.reduce((sum, row) => sum + row.interactions, 0);
-      return totalInter > 0 ? `₹${(totalCost / totalInter).toFixed(2)}` : '₹0.00';
-    case 'cost':
-      const cost = data.reduce((sum, row) => sum + parseFloat(row.cost.replace(/[₹,]/g, '')), 0);
-      return `₹${cost.toFixed(2)}`;
-    case 'convRate':
-    case 'conversions':
-    case 'costPerConv':
-      return data.reduce((sum, row) => {
-        const val = parseFloat(row[column.key].toString().replace(/[₹,%]/g, ''));
-        return sum + (isNaN(val) ? 0 : val);
-      }, 0).toFixed(2) + (column.key === 'convRate' ? '%' : column.key === 'costPerConv' ? '' : '');
-    default:
-      return '';
-  }
-};
-
-const calculateWhenTotals = (data: WhenAdsShowedData[], column: Column) => {
-  switch (column.key) {
-    case 'day':
-      return 'Total: Day...';
-    case 'impressions':
-      return data.reduce((sum, row) => sum + row.impressions, 0).toLocaleString();
-    case 'interactions':
-      const total = data.reduce((sum, row) => sum + row.interactions, 0);
-      return (
-        <div>
-          {total}
-          <div className="text-xs text-gray-500">clicks</div>
-        </div>
-      );
-    case 'interactionRate':
-    case 'avgCost':
-    case 'cost':
-    case 'convRate':
-    case 'conversions':
-    case 'costPerConv':
-      return calculateDeviceTotals(data as any, column);
-    default:
-      return '';
-  }
-};
-
-const calculateMatchedTotals = (data: MatchedLocationData[], column: Column) => {
-  switch (column.key) {
-    case 'matchedLocation':
-      return 'Total: Locations';
-    case 'clicks':
-    case 'impressions':
-      return data.reduce((sum, row) => sum + row[column.key], 0).toLocaleString();
-    case 'ctr':
-      const totalClicks = data.reduce((sum, row) => sum + row.clicks, 0);
-      const totalImp = data.reduce((sum, row) => sum + row.impressions, 0);
-      return totalImp > 0 ? `${((totalClicks / totalImp) * 100).toFixed(2)}%` : '0.00%';
-    case 'avgCpc':
-    case 'cost':
-    case 'convRate':
-    case 'conversions':
-    case 'costPerConv':
-      return calculateDeviceTotals(data as any, column);
-    default:
-      return '';
-  }
-};
-
-// Chart data
 const chartDataPoints = [
   { x: 100, y: 180 }, { x: 200, y: 150 }, { x: 300, y: 250 }, { x: 400, y: 305 },
   { x: 500, y: 280 }, { x: 600, y: 290 }, { x: 700, y: 305 }, { x: 800, y: 315 },
-  { x: 900, y: 345 }, { x: 1000, y: 365 }, { x: 1100, y: 360 }, { x: 1200, y: 362 }
+  { x: 900, y: 345 }, { x: 1000, y: 365 }, { x: 1100, y: 360 }, { x: 1200, y: 362 },
+  { x: 1300, y: 365 }, { x: 1400, y: 362 }, { x: 1500, y: 360 }, { x: 1600, y: 362 },
+  { x: 1700, y: 365 }
 ];
-
-// ──────────────────────────────────────────────────────────────
-// Main Component
-
-// ──────────────────────────────────────────────────────────────
-export const  WhenWhereAdsShowedPage : React.FC = () =>{
+export const WhenWhereAdsShowedPage: React.FC = () => {
   const [selectedTab, setSelectedTab] = useState<'devices' | 'when' | 'where' | 'matched'>('devices');
+  const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
   const [selectedMetric, setSelectedMetric] = useState('clicks');
   const [selectedComparison, setSelectedComparison] = useState('none');
+  const [levelFilter, setLevelFilter] = useState('campaign');
 
   const tabs = [
     { id: 'devices' as const, label: 'Devices' },
@@ -522,70 +23,95 @@ export const  WhenWhereAdsShowedPage : React.FC = () =>{
     { id: 'matched' as const, label: 'Matched locations' }
   ];
 
-  // Get current data and columns based on selected tab
-  const getCurrentConfig = () => {
+  // Get current data based on selected tab
+  const getCurrentData = () => {
     switch (selectedTab) {
       case 'devices':
-        return { 
-          data: devicesData, 
-          columns: devicesColumns, 
-          calculateTotal: calculateDeviceTotals,
-          totalLabel: 'Total'
-        };
+        return devicesData;
       case 'when':
-        return { 
-          data: whenAdsShowedData, 
-          columns: whenColumns, 
-          calculateTotal: calculateWhenTotals,
-          totalLabel: 'Total: Day...'
-        };
+        return whenAdsShowedData;
       case 'matched':
-        return { 
-          data: matchedLocationsData, 
-          columns: matchedColumns, 
-          calculateTotal: calculateMatchedTotals,
-          totalLabel: 'Total: Locations'
-        };
+        return matchedLocationsData;
       default:
-        return { 
-          data: devicesData, 
-          columns: devicesColumns, 
-          calculateTotal: calculateDeviceTotals,
-          totalLabel: 'Total'
-        };
+        return devicesData;
     }
   };
 
-  const config = getCurrentConfig();
+  const currentData = getCurrentData();
+
+  const toggleRowSelection = (id: string) => {
+    setSelectedRows(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(id)) {
+        newSet.delete(id);
+      } else {
+        newSet.add(id);
+      }
+      return newSet;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedRows.size === currentData.length) {
+      setSelectedRows(new Set());
+    } else {
+      setSelectedRows(new Set(currentData.map((r: any) => r.id)));
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-normal text-gray-900">When and where ads showed</h1>
-              
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-100 rounded text-sm">
-                <span className="text-gray-600">View (2 filters)</span>
-                <svg className="w-4 h-4 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+    <div className="bg-[#f8f9fa] border-b border-gray-300 px-6 py-4">
+        <div className="flex items-center justify-between">
+          {/* Left Side - View and Campaign Selectors */}
+          <div className="flex items-center gap-3">
+            {/* View Dropdown */}
+            <div className="relative">
+              <button className="bg-white border border-gray-300 rounded px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2 min-w-[200px]">
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd"/>
                 </svg>
-                <span className="text-gray-900 font-medium">All campaigns</span>
-              </div>
+                <div className="flex-1 text-left">
+                  <div className="text-xs text-gray-500">View (2 filters)</div>
+                  <div className="text-sm font-medium text-gray-900">All campaigns</div>
+                </div>
+              </button>
+              <div className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600"></div>
             </div>
-            
-            <div className="flex items-center gap-3">
-              <span className="text-sm text-gray-600">This month</span>
-              <select className="px-3 py-2 border border-gray-300 rounded text-sm bg-white">
-                <option>Nov 1 – 28, 2025</option>
-              </select>
-              <button className="text-blue-600 text-sm font-medium hover:underline">
-                Show last 30 days
+
+            {/* Campaign Dropdown */}
+            <div className="relative">
+              <button className="bg-white border border-gray-300 rounded px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2 min-w-[200px]">
+                <div className="flex-1 text-left">
+                  <div className="text-xs text-gray-500">Campaigns (2)</div>
+                  <div className="text-sm font-medium text-gray-900">Select a campaign</div>
+                </div>
               </button>
             </div>
           </div>
+
+          {/* Right Side - Save Button */}
+          <button className="flex flex-col items-center gap-1 px-3 py-1 hover:bg-gray-200 rounded text-gray-600">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/>
+            </svg>
+            <span className="text-xs">Save</span>
+          </button>
+        </div>
+
+        {/* Filter Tags Row */}
+        <div className="flex items-center gap-3 mt-3">
+          <span className="text-sm text-gray-600">Filters</span>
+          <button className="bg-white border border-gray-300 rounded-full px-3 py-1 text-xs text-gray-700 hover:bg-gray-50 flex items-center gap-1">
+            Campaign status: Enabled, Paused
+          </button>
+          <button className="bg-white border border-gray-300 rounded-full px-3 py-1 text-xs text-gray-700 hover:bg-gray-50 flex items-center gap-1">
+            Ad group status: Enabled, Paused
+          </button>
+          <button className="text-sm text-gray-600 hover:text-gray-900">
+            Add filter
+          </button>
         </div>
       </div>
 
@@ -595,7 +121,10 @@ export const  WhenWhereAdsShowedPage : React.FC = () =>{
           {tabs.map((tab) => (
             <button
               key={tab.id}
-              onClick={() => setSelectedTab(tab.id)}
+              onClick={() => {
+                setSelectedTab(tab.id);
+                setSelectedRows(new Set());
+              }}
               className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
                 selectedTab === tab.id
                   ? 'border-blue-600 text-blue-600'
@@ -609,7 +138,7 @@ export const  WhenWhereAdsShowedPage : React.FC = () =>{
       </div>
 
       {/* Chart Section */}
-      <div className="bg-white px-6 pt-6">
+       <div className="bg-white px-6 pt-6">
         {/* Chart Controls */}
         <div className="flex items-center justify-end gap-3 mb-4">
           <select 
@@ -634,7 +163,6 @@ export const  WhenWhereAdsShowedPage : React.FC = () =>{
           </select>
           
           <button className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded">
-      
             Chart type
           </button>
           
@@ -644,7 +172,6 @@ export const  WhenWhereAdsShowedPage : React.FC = () =>{
           </button>
           
           <button className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded">
-        
             Adjust
           </button>
         </div>
@@ -687,44 +214,358 @@ export const  WhenWhereAdsShowedPage : React.FC = () =>{
         </div>
       </div>
 
-      {/* Data Table - Using Reusable Component */}
-      {selectedTab !== 'where' ? (
-        <div className="px-6 py-6">
-          <DataTable
-            data={config.data}
-            columns={config.columns}
-            title={`When and where ads showed - ${selectedTab}`}
-            enableSearch={true}
-            enableFilters={true}
-            enableColumns={true}
-            enableSegment={selectedTab === 'matched'}
-            enableDownload={true}
-            enableExpand={true}
-            enableRowSelection={true}
-            searchPlaceholder={`Search ${selectedTab}...`}
-            filterOptions={
-              selectedTab === 'devices'
-                ? ['Device type', 'Campaign', 'Bid adjustment']
-                : selectedTab === 'when'
-                ? ['Day', 'Hour', 'Campaign']
-                : ['Location', 'Campaign']
-            }
-            segmentOptions={['Time', 'Device', 'Network']}
-            rowKey="id"
-            showTotal={true}
-            totalLabel={config.totalLabel}
-            calculateTotal={config.calculateTotal}
-            emptyMessage={`No ${selectedTab} data available`}
-            stickyHeader={true}
-          />
-        </div>
-      ) : (
-        <div className="px-6 py-6">
-          <div className="bg-white border border-gray-200 rounded p-12 text-center text-gray-500">
-            <p>Where ads showed data will be displayed here</p>
+      {/* Action Bar */}
+      <div className="bg-white border-b border-gray-200 px-6 py-3 mx-6 mt-6 border-t border-x">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            {selectedTab === 'devices' && (
+              <>
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 border border-blue-200 rounded-full text-sm">
+                  <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+                  <span className="text-blue-900 font-medium">1</span>
+                </div>
+                
+                <button className="px-4 py-2 border border-gray-300 rounded text-sm bg-white hover:bg-gray-50">
+                  Level: Campaign
+                </button>
+              </>
+            )}
+            
+            {selectedTab === 'when' && (
+              <button className="px-4 py-2 border border-gray-300 rounded text-sm bg-white hover:bg-gray-50 flex items-center gap-2">
+                Day & hour
+                <ChevronDown className="w-4 h-4" />
+              </button>
+            )}
+
+            {selectedTab === 'matched' && (
+              <button className="px-4 py-2 border border-gray-300 rounded text-sm bg-white hover:bg-gray-50 flex items-center gap-2">
+                Account view
+                <ChevronDown className="w-4 h-4" />
+              </button>
+            )}
+            
+            <button className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900">
+              <Filter className="w-4 h-4" />
+              Add filter
+            </button>
+          </div>
+
+          <div className="flex items-center gap-4">
+            {selectedTab === 'matched' && (
+              <button className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:text-gray-900">
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M3 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z" />
+                </svg>
+                Segment
+              </button>
+            )}
+
+            <button className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:text-gray-900">
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z" />
+              </svg>
+              Columns
+            </button>
+            
+            <button className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:text-gray-900">
+              <Download className="w-4 h-4" />
+              Download
+            </button>
+            
+            <button className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:text-gray-900">
+              <Maximize2 className="w-4 h-4" />
+              Expand
+            </button>
+            
+            {selectedTab !== 'matched' && (
+              <button className="p-2 text-gray-600 hover:text-gray-900">
+                <ChevronUp className="w-5 h-5" />
+              </button>
+            )}
           </div>
         </div>
-      )}
+      </div>
+
+      {/* Data Table */}
+      <div className="px-6 pb-4 bg-gray-50">
+        <div className="bg-white border border-gray-200 border-t-0 rounded-b overflow-x-auto">
+          {selectedTab === 'devices' && (
+            <table className="w-full text-sm">
+              <thead className="bg-gray-50 border-b border-gray-200">
+                <tr>
+                  <th className="px-4 py-3 text-left w-10">
+                    <input
+                      type="checkbox"
+                      className="rounded border-gray-300 cursor-pointer"
+                      checked={selectedRows.size === currentData.length}
+                      onChange={toggleSelectAll}
+                    />
+                  </th>
+                  <th className="px-4 py-3 text-left font-medium text-gray-700">Device</th>
+                  <th className="px-4 py-3 text-left font-medium text-gray-700">Level</th>
+                  <th className="px-4 py-3 text-left font-medium text-gray-700">Added to</th>
+                  <th className="px-4 py-3 text-left font-medium text-gray-700">Bid adj.</th>
+                  <th className="px-4 py-3 text-left font-medium text-gray-700">Ad group bid adj.</th>
+                  <th className="px-4 py-3 text-right font-medium text-gray-700">Impr.</th>
+                  <th className="px-4 py-3 text-right font-medium text-gray-700">
+                    <div className="flex items-center justify-end gap-1">
+                      <ChevronDown className="w-4 h-4" />
+                      Interacti.
+                    </div>
+                  </th>
+                  <th className="px-4 py-3 text-right font-medium text-gray-700">Interaction rate</th>
+                  <th className="px-4 py-3 text-right font-medium text-gray-700">Avg. cost</th>
+                  <th className="px-4 py-3 text-right font-medium text-gray-700">Cost</th>
+                  <th className="px-4 py-3 text-right font-medium text-gray-700">Conv. rate</th>
+                  <th className="px-4 py-3 text-right font-medium text-gray-700">Conversions</th>
+                  <th className="px-4 py-3 text-right font-medium text-gray-700">Cost / conv.</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white">
+                {devicesData.map((device) => (
+                  <tr key={device.id} className="border-b border-gray-100 hover:bg-gray-50">
+                    <td className="px-4 py-3">
+                      <input
+                        type="checkbox"
+                        className="rounded border-gray-300 cursor-pointer"
+                        checked={selectedRows.has(device.id)}
+                        onChange={() => toggleRowSelection(device.id)}
+                      />
+                    </td>
+                    <td className="px-4 py-3 text-gray-900">{device.device}</td>
+                    <td className="px-4 py-3 text-gray-700">{device.level}</td>
+                    <td className="px-4 py-3">
+                      <a href="#" className="text-blue-600 hover:underline">{device.addedTo}</a>
+                    </td>
+                    <td className="px-4 py-3 text-gray-700">{device.bidAdj || '—'}</td>
+                    <td className="px-4 py-3 text-gray-700">{device.adGroupBidAdj}</td>
+                    <td className="px-4 py-3 text-right text-gray-700">{device.impressions.toLocaleString()}</td>
+                    <td className="px-4 py-3 text-right text-gray-700">
+                      {device.interactions > 0 ? (
+                        <>
+                          {device.interactions}
+                          <div className="text-xs text-gray-500">clicks</div>
+                        </>
+                      ) : (
+                        device.interactions
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-right text-gray-700">{device.interactionRate}</td>
+                    <td className="px-4 py-3 text-right text-gray-700">{device.avgCost}</td>
+                    <td className="px-4 py-3 text-right text-gray-700">{device.cost}</td>
+                    <td className="px-4 py-3 text-right text-gray-700">{device.convRate}</td>
+                    <td className="px-4 py-3 text-right text-gray-700">{device.conversions}</td>
+                    <td className="px-4 py-3 text-right text-gray-700">{device.costPerConv}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+
+          {selectedTab === 'when' && (
+            <table className="w-full text-sm">
+              <thead className="bg-gray-50 border-b border-gray-200">
+                <tr>
+                  <th className="px-4 py-3 text-left w-10">
+                    <input
+                      type="checkbox"
+                      className="rounded border-gray-300 cursor-pointer"
+                      checked={selectedRows.size === currentData.length}
+                      onChange={toggleSelectAll}
+                    />
+                  </th>
+                  <th className="px-4 py-3 text-left font-medium text-gray-700">Day</th>
+                  <th className="px-4 py-3 text-left font-medium text-gray-700">Hour</th>
+                  <th className="px-4 py-3 text-left font-medium text-gray-700">Campaign</th>
+                  <th className="px-4 py-3 text-right font-medium text-gray-700">Impr.</th>
+                  <th className="px-4 py-3 text-right font-medium text-gray-700">
+                    <div className="flex items-center justify-end gap-1">
+                      <ChevronDown className="w-4 h-4" />
+                      Interaction
+                    </div>
+                  </th>
+                  <th className="px-4 py-3 text-right font-medium text-gray-700">Interaction rate</th>
+                  <th className="px-4 py-3 text-right font-medium text-gray-700">Avg. cost</th>
+                  <th className="px-4 py-3 text-right font-medium text-gray-700">Cost</th>
+                  <th className="px-4 py-3 text-right font-medium text-gray-700">Conv. rate</th>
+                  <th className="px-4 py-3 text-right font-medium text-gray-700">Conversions</th>
+                  <th className="px-4 py-3 text-right font-medium text-gray-700">Cost / conv.</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white">
+                {/* Total Row */}
+                <tr className="bg-gray-50 font-medium border-b border-gray-200">
+                  <td className="px-4 py-3"></td>
+                  <td className="px-4 py-3 flex items-center gap-2 text-gray-900">
+                    Total: Day...
+                    <button className="text-gray-400 hover:text-gray-600">
+                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                      </svg>
+                    </button>
+                  </td>
+                  <td className="px-4 py-3"></td>
+                  <td className="px-4 py-3"></td>
+                  <td className="px-4 py-3 text-right text-gray-900">1,994</td>
+                  <td className="px-4 py-3 text-right text-gray-900">
+                    239
+                    <div className="text-xs text-gray-500">clicks</div>
+                  </td>
+                  <td className="px-4 py-3 text-right text-gray-900">11.99%</td>
+                  <td className="px-4 py-3 text-right text-gray-900">₹7.09</td>
+                  <td className="px-4 py-3 text-right text-gray-900">₹1,695.56</td>
+                  <td className="px-4 py-3 text-right text-gray-900">6.28%</td>
+                  <td className="px-4 py-3 text-right text-gray-900">15.00</td>
+                  <td className="px-4 py-3 text-right text-gray-900">₹113.04</td>
+                </tr>
+
+                {whenAdsShowedData.map((item) => (
+                  <tr key={item.id} className="border-b border-gray-100 hover:bg-gray-50">
+                    <td className="px-4 py-3">
+                      <input
+                        type="checkbox"
+                        className="rounded border-gray-300 cursor-pointer"
+                        checked={selectedRows.has(item.id)}
+                        onChange={() => toggleRowSelection(item.id)}
+                      />
+                    </td>
+                    <td className="px-4 py-3 text-gray-900">{item.day}</td>
+                    <td className="px-4 py-3 text-gray-700">{item.hour}</td>
+                    <td className="px-4 py-3">
+                      <a href="#" className="text-blue-600 hover:underline">{item.campaign}</a>
+                    </td>
+                    <td className="px-4 py-3 text-right text-gray-700">{item.impressions}</td>
+                    <td className="px-4 py-3 text-right text-gray-700">
+                      {item.interactions}
+                      <div className="text-xs text-gray-500">clicks</div>
+                    </td>
+                    <td className="px-4 py-3 text-right text-gray-700">{item.interactionRate}</td>
+                    <td className="px-4 py-3 text-right text-gray-700">{item.avgCost}</td>
+                    <td className="px-4 py-3 text-right text-gray-700">{item.cost}</td>
+                    <td className="px-4 py-3 text-right text-gray-700">{item.convRate}</td>
+                    <td className="px-4 py-3 text-right text-gray-700">{item.conversions}</td>
+                    <td className="px-4 py-3 text-right text-gray-700">{item.costPerConv}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+
+          {selectedTab === 'matched' && (
+            <table className="w-full text-sm">
+              <thead className="bg-gray-50 border-b border-gray-200">
+                <tr>
+                  <th className="px-4 py-3 text-left w-10">
+                    <input
+                      type="checkbox"
+                      className="rounded border-gray-300 cursor-pointer"
+                      checked={selectedRows.size === currentData.length}
+                      onChange={toggleSelectAll}
+                    />
+                  </th>
+                  <th className="px-4 py-3 text-left font-medium text-gray-700">Matched location</th>
+                  <th className="px-4 py-3 text-right font-medium text-gray-700">
+                    <div className="flex items-center justify-end gap-1">
+                      <ChevronDown className="w-4 h-4" />
+                      Clicks
+                    </div>
+                  </th>
+                  <th className="px-4 py-3 text-right font-medium text-gray-700">Impr.</th>
+                  <th className="px-4 py-3 text-right font-medium text-gray-700">CTR</th>
+                  <th className="px-4 py-3 text-right font-medium text-gray-700">Avg. CPC</th>
+                  <th className="px-4 py-3 text-right font-medium text-gray-700">Cost</th>
+                  <th className="px-4 py-3 text-right font-medium text-gray-700">Conv. rate</th>
+                  <th className="px-4 py-3 text-right font-medium text-gray-700">Conversions</th>
+                  <th className="px-4 py-3 text-right font-medium text-gray-700">Cost / conv.</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white">
+                {matchedLocationsData.map((location) => (
+                  <tr key={location.id} className="border-b border-gray-100 hover:bg-gray-50">
+                    <td className="px-4 py-3">
+                      <input
+                        type="checkbox"
+                        className="rounded border-gray-300 cursor-pointer"
+                        checked={selectedRows.has(location.id)}
+                        onChange={() => toggleRowSelection(location.id)}
+                      />
+                    </td>
+                    <td className="px-4 py-3">
+                      <a href="#" className="text-blue-600 hover:underline">{location.matchedLocation}</a>
+                    </td>
+                    <td className="px-4 py-3 text-right text-gray-700">{location.clicks}</td>
+                    <td className="px-4 py-3 text-right text-gray-700">{location.impressions.toLocaleString()}</td>
+                    <td className="px-4 py-3 text-right text-gray-700">{location.ctr}</td>
+                    <td className="px-4 py-3 text-right text-gray-700">{location.avgCpc}</td>
+                    <td className="px-4 py-3 text-right text-gray-700">{location.cost}</td>
+                    <td className="px-4 py-3 text-right text-gray-700">{location.convRate}</td>
+                    <td className="px-4 py-3 text-right text-gray-700">{location.conversions}</td>
+                    <td className="px-4 py-3 text-right text-gray-700">{location.costPerConv}</td>
+                  </tr>
+                ))}
+
+                {/* Total: Locations Row */}
+                <tr className="bg-gray-50 font-medium border-b border-gray-200">
+                  <td className="px-4 py-3"></td>
+                  <td className="px-4 py-3 flex items-center gap-2 text-gray-900">
+                    Total: Locations
+                    <button className="text-gray-400 hover:text-gray-600">
+                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                      </svg>
+                    </button>
+                  </td>
+                  <td className="px-4 py-3 text-right text-gray-900">239</td>
+                  <td className="px-4 py-3 text-right text-gray-900">1,994</td>
+                  <td className="px-4 py-3 text-right text-gray-900">11.99%</td>
+                  <td className="px-4 py-3 text-right text-gray-900">₹7.09</td>
+                  <td className="px-4 py-3 text-right text-gray-900">₹1,695.56</td>
+                  <td className="px-4 py-3 text-right text-gray-900">6.28%</td>
+                  <td className="px-4 py-3 text-right text-gray-900">15.00</td>
+                  <td className="px-4 py-3 text-right text-gray-900">₹113.04</td>
+                </tr>
+
+                {/* Total: Account Row */}
+                <tr className="bg-gray-50 font-medium border-b border-gray-200">
+                  <td className="px-4 py-3">
+                    <ChevronDown className="w-4 h-4 text-gray-600" />
+                  </td>
+                  <td className="px-4 py-3 flex items-center gap-2 text-gray-900">
+                    Total: Acco...
+                    <button className="text-gray-400 hover:text-gray-600">
+                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                      </svg>
+                    </button>
+                  </td>
+                  <td className="px-4 py-3 text-right text-gray-900">239</td>
+                  <td className="px-4 py-3 text-right text-gray-900">1,994</td>
+                  <td className="px-4 py-3 text-right text-gray-900">11.99%</td>
+                  <td className="px-4 py-3 text-right text-gray-900">₹7.09</td>
+                  <td className="px-4 py-3 text-right text-gray-900">₹1,695.56</td>
+                  <td className="px-4 py-3 text-right text-gray-900">6.28%</td>
+                  <td className="px-4 py-3 text-right text-gray-900">15.00</td>
+                  <td className="px-4 py-3 text-right text-gray-900">₹113.04</td>
+                </tr>
+              </tbody>
+            </table>
+          )}
+
+          {selectedTab === 'where' && (
+            <div className="p-12 text-center text-gray-500">
+              <p>Where ads showed data will be displayed here</p>
+            </div>
+          )}
+        </div>
+
+        {/* Pagination for Matched locations tab */}
+        {selectedTab === 'matched' && (
+          <div className="mt-4 flex justify-end">
+            <span className="text-sm text-gray-600">1 - 1 of 1</span>
+          </div>
+        )}
+      </div>
 
       {/* Footer Info */}
       <div className="bg-blue-50 border-t border-blue-100 px-6 py-3 mt-6">
@@ -734,11 +575,13 @@ export const  WhenWhereAdsShowedPage : React.FC = () =>{
           </svg>
           <p className="text-sm text-blue-900">
             <span className="font-medium">Optimize device performance:</span> Review which devices are 
-            driving the most conversions and adjust your bids accordingly. Learn more about{' '}
+            driving the most conversions and adjust your bids accordingly. Consider setting bid adjustments 
+            to increase or decrease bids for specific devices. Mobile phones often have different conversion 
+            patterns than desktops, so tailor your strategy to each device type. Learn more about{' '}
             <a href="#" className="underline hover:text-blue-700">device targeting and bid adjustments</a>.
           </p>
         </div>
       </div>
     </div>
   );
-}
+};

@@ -458,11 +458,8 @@ export const CampaignsPage: React.FC = () => {
 
   return (
     <div className="bg-white min-h-screen">
-      {/* ============================================ */}
-      {/* TOP BAR - Search + Navigation (Google Ads Style) */}
-      {/* ============================================ */}
 
-        <div className="bg-[#f8f9fa] border-b border-gray-300 px-6 py-4">
+      <div className="bg-[#f8f9fa] border-b border-gray-300 px-6 py-4">
         <div className="flex items-center justify-between">
           {/* Left Side - View and Campaign Selectors */}
           <div className="flex items-center gap-3">
@@ -514,9 +511,6 @@ export const CampaignsPage: React.FC = () => {
           </button>
         </div>
       </div>
-      {/* ============================================ */}
-      {/* MAIN CONTENT AREA */}
-      {/* ============================================ */}
       <div className="px-4 py-4">
         {/* Page Title and Date Range */}
         <div className="flex items-center justify-between mb-3">
@@ -525,16 +519,19 @@ export const CampaignsPage: React.FC = () => {
           {/* Date Range Selector (Google Ads Style) */}
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-600">{formatDisplay()}</span>
-            <DropDownListComponent
-              dataSource={dateRangePresets}
-              fields={{ text: 'text', value: 'value' }}
-              value={preset}
-              change={(e) => setPreset(e.value as any)}
-              placeholder="Select date range"
-              cssClass="w-44"
-            />
-            <ButtonComponent iconCss="e-icons e-chevron-left" cssClass="e-flat e-small" />
-            <ButtonComponent iconCss="e-icons e-chevron-right" cssClass="e-flat e-small" />
+            <div className="px-3 py-2 border border-gray-300 rounded text-sm bg-white">
+              <DropDownListComponent
+                dataSource={dateRangePresets}
+                fields={{ text: 'text', value: 'value' }}
+                value={preset}
+                change={(e) => setPreset(e.value as any)}
+                placeholder={formatDisplay()}
+                floatLabelType="Never"
+                cssClass="w-48"
+              />
+            </div>
+            {/* <ButtonComponent iconCss="e-icons e-chevron-left" cssClass="e-flat e-small" />
+            <ButtonComponent iconCss="e-icons e-chevron-right" cssClass="e-flat e-small" /> */}
             <ButtonComponent cssClass="e-link e-small text-blue-600">
               Show last 30 days
             </ButtonComponent>
@@ -554,9 +551,7 @@ export const CampaignsPage: React.FC = () => {
           </button>
         </div>
 
-        {/* ============================================ */}
-        {/* METRICS CARDS */}
-        {/* ============================================ */}
+
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
           <div className="bg-blue-500 rounded p-4 text-white">
             <div className="flex items-center justify-between mb-2">
@@ -611,9 +606,6 @@ export const CampaignsPage: React.FC = () => {
           </div>
         </div>
 
-        {/* ============================================ */}
-        {/* CHART SECTION */}
-        {/* ============================================ */}
         <div className="bg-white border border-gray-200 rounded mb-4">
           {chartLoading ? (
             <div className="h-64 flex items-center justify-center text-gray-400">
@@ -680,10 +672,6 @@ export const CampaignsPage: React.FC = () => {
           )}
         </div>
 
-
-        {/* ============================================ */}
-        {/* TABLE TOOLBAR - Above Table (Google Ads Style) */}
-        {/* ============================================ */}
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <ButtonComponent 
@@ -876,10 +864,6 @@ export const CampaignsPage: React.FC = () => {
             </div>
           </div>
         )}
-
-        {/* ============================================ */}
-        {/* DATA TABLE */}
-        {/* ============================================ */}
         <div className="bg-white border border-gray-200 rounded overflow-x-auto">
           <table className="w-full text-xs min-w-[1400px]">
             <thead className="bg-gray-50 border-b border-gray-200">
@@ -1195,15 +1179,7 @@ export const CampaignsPage: React.FC = () => {
             </tbody>
           </table>
         </div>
-
-        {/* Recommendation Card */}
       </div>
-
-      {/* ============================================ */}
-      {/* DIALOGS */}
-      {/* ============================================ */}
-
-      {/* Table Search Dialog - KEYWORD SEARCH ALL FIELDS */}
       <DialogComponent
         width="480px"
         isModal={true}

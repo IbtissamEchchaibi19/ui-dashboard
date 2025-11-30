@@ -1,307 +1,146 @@
-import {
-  Keyword,
-  KeywordMatchType,
-  KeywordStatus,
-  CompetitionLevel,
-  QualityScoreStatus,
-  KeywordBid,
-  KeywordHistoricalMetrics,
-  KeywordPerformanceMetrics,
-  ImpressionShareMetrics,
-  KeywordForecastMetrics,
-  QualityScoreComponents,
-} from '@domain/entities';
-import { Money } from '../../domain/value-objects/Money';
 
-/**
- * Generate realistic mock keywords for testing
- * Based on Google Ads Keyword Planner data patterns
- */
-export const mockKeywords: Keyword[] = [
-  new Keyword(
-    'kw_001',
-    'ag_001',
-    'camp_001',
-    'running shoes',
-    KeywordMatchType.EXACT_MATCH,
-    KeywordStatus.ENABLED,
-    'https://example.com/running-shoes',
-    {
-      bidAmount: Money.create(2.5),
-      firstPageBid: Money.create(1.8),
-      topOfPageBid: Money.create(2.3),
-      firstPositionBid: Money.create(3.2),
-    } as KeywordBid,
-    9,
-    {
-      expectedCtr: QualityScoreStatus.ABOVE_AVERAGE,
-      adRelevance: QualityScoreStatus.ABOVE_AVERAGE,
-      landingPageExperience: QualityScoreStatus.ABOVE_AVERAGE,
-    } as QualityScoreComponents,
-    {
-      avgMonthlySearches: 165000,
-      competitionLevel: CompetitionLevel.HIGH,
-      competitionIndex: 85,
-      lowTopOfPageBid: Money.create(2.1),
-      highTopOfPageBid: Money.create(3.5),
-    } as KeywordHistoricalMetrics,
-    {
-      impressions: 125430,
-      clicks: 4825,
-      ctr: 3.85,
-      avgCpc: Money.create(2.32),
-      cost: Money.create(11195),
-      conversions: 185,
-      conversionRate: 3.83,
-      costPerConversion: Money.create(60.51),
-      conversionValue: Money.create(27750),
-    } as KeywordPerformanceMetrics,
-    {
-      searchImpressionShare: 78.5,
-      searchAbsoluteTopImpressionShare: 42.3,
-      searchTopImpressionShare: 65.8,
-      searchImpressionShareLostBudget: 12.5,
-      searchImpressionShareLostRank: 9.0,
-    } as ImpressionShareMetrics,
-    {
-      estimatedClicks: 5200,
-      estimatedImpressions: 135000,
-      estimatedCost: Money.create(12000),
-      estimatedConversions: 200,
-      estimatedCtr: 3.85,
-      estimatedAvgCpc: Money.create(2.31),
-    } as KeywordForecastMetrics,
-    false,
-    new Date('2024-01-15'),
-    new Date('2024-11-26')
-  ),
+interface Keyword {
+  id: string;
+  keyword: string;
+  matchType: 'Exact match' | 'Broad match' | 'Phrase match';
+  campaign: string;
+  adGroup: string;
+  status: 'Eligible' | 'Paused' | 'Removed';
+  finalUrl: string;
+  impressions?: number;
+  clicks?: number;
+  cost?: number;
+  conversions?: number;
+}
 
-  new Keyword(
-    'kw_002',
-    'ag_001',
-    'camp_001',
-    'best running shoes',
-    KeywordMatchType.BROAD_MATCH,
-    KeywordStatus.ENABLED,
-    'https://example.com/running-shoes',
-    {
-      bidAmount: Money.create(1.8),
-      firstPageBid: Money.create(1.2),
-      topOfPageBid: Money.create(1.6),
-      firstPositionBid: Money.create(2.4),
-    } as KeywordBid,
-    7,
-    {
-      expectedCtr: QualityScoreStatus.AVERAGE,
-      adRelevance: QualityScoreStatus.ABOVE_AVERAGE,
-      landingPageExperience: QualityScoreStatus.AVERAGE,
-    } as QualityScoreComponents,
-    {
-      avgMonthlySearches: 74000,
-      competitionLevel: CompetitionLevel.MEDIUM,
-      competitionIndex: 62,
-      lowTopOfPageBid: Money.create(1.4),
-      highTopOfPageBid: Money.create(2.2),
-    } as KeywordHistoricalMetrics,
-    {
-      impressions: 89640,
-      clicks: 2145,
-      ctr: 2.39,
-      avgCpc: Money.create(1.68),
-      cost: Money.create(3603.6),
-      conversions: 58,
-      conversionRate: 2.7,
-      costPerConversion: Money.create(62.13),
-      conversionValue: Money.create(8700),
-    } as KeywordPerformanceMetrics,
-    {
-      searchImpressionShare: 65.2,
-      searchAbsoluteTopImpressionShare: 28.5,
-      searchTopImpressionShare: 52.3,
-      searchImpressionShareLostBudget: 18.3,
-      searchImpressionShareLostRank: 16.5,
-    } as ImpressionShareMetrics,
-    {
-      estimatedClicks: 2500,
-      estimatedImpressions: 95000,
-      estimatedCost: Money.create(4200),
-      estimatedConversions: 68,
-      estimatedCtr: 2.63,
-      estimatedAvgCpc: Money.create(1.68),
-    } as KeywordForecastMetrics,
-    false,
-    new Date('2024-01-20'),
-    new Date('2024-11-26')
-  ),
+interface NegativeKeyword {
+  id: string;
+  negativeKeyword: string;
+  addedTo: string;
+  level: 'Campaign' | 'Ad group';
+  matchType: 'Exact match' | 'Broad match' | 'Phrase match';
+}
 
-  new Keyword(
-    'kw_003',
-    'ag_002',
-    'camp_001',
-    'affordable running shoes',
-    KeywordMatchType.PHRASE_MATCH,
-    KeywordStatus.ENABLED,
-    'https://example.com/affordable-shoes',
-    {
-      bidAmount: Money.create(1.5),
-      firstPageBid: Money.create(0.9),
-      topOfPageBid: Money.create(1.2),
-      firstPositionBid: Money.create(1.8),
-    } as KeywordBid,
-    4,
-    {
-      expectedCtr: QualityScoreStatus.BELOW_AVERAGE,
-      adRelevance: QualityScoreStatus.AVERAGE,
-      landingPageExperience: QualityScoreStatus.BELOW_AVERAGE,
-    } as QualityScoreComponents,
-    {
-      avgMonthlySearches: 22000,
-      competitionLevel: CompetitionLevel.LOW,
-      competitionIndex: 38,
-      lowTopOfPageBid: Money.create(0.8),
-      highTopOfPageBid: Money.create(1.6),
-    } as KeywordHistoricalMetrics,
-    {
-      impressions: 45230,
-      clicks: 385,
-      ctr: 0.85,
-      avgCpc: Money.create(1.42),
-      cost: Money.create(546.7),
-      conversions: 3,
-      conversionRate: 0.78,
-      costPerConversion: Money.create(182.23),
-      conversionValue: Money.create(450),
-    } as KeywordPerformanceMetrics,
-    {
-      searchImpressionShare: 42.8,
-      searchAbsoluteTopImpressionShare: 12.5,
-      searchTopImpressionShare: 28.7,
-      searchImpressionShareLostBudget: 8.2,
-      searchImpressionShareLostRank: 49.0,
-    } as ImpressionShareMetrics,
-    {
-      estimatedClicks: 420,
-      estimatedImpressions: 48000,
-      estimatedCost: Money.create(596),
-      estimatedConversions: 3,
-      estimatedCtr: 0.88,
-      estimatedAvgCpc: Money.create(1.42),
-    } as KeywordForecastMetrics,
-    false,
-    new Date('2024-02-10'),
-    new Date('2024-11-26')
-  ),
+interface URLInclusion {
+  id: string;
+  urlInclusion: string;
+  campaign: string;
+  adGroup: string;
+  status: string;
+  campaignType: string;
+  impressions?: number;
+  interactions?: number;
+}
 
-  new Keyword(
-    'kw_004',
-    'ag_001',
-    'camp_001',
-    'nike running shoes',
-    KeywordMatchType.EXACT_MATCH,
-    KeywordStatus.ENABLED,
-    'https://example.com/nike-shoes',
-    {
-      bidAmount: Money.create(3.2),
-      firstPageBid: Money.create(2.5),
-      topOfPageBid: Money.create(3.0),
-      firstPositionBid: Money.create(4.2),
-    } as KeywordBid,
-    8,
-    {
-      expectedCtr: QualityScoreStatus.ABOVE_AVERAGE,
-      adRelevance: QualityScoreStatus.ABOVE_AVERAGE,
-      landingPageExperience: QualityScoreStatus.AVERAGE,
-    } as QualityScoreComponents,
-    {
-      avgMonthlySearches: 368000,
-      competitionLevel: CompetitionLevel.HIGH,
-      competitionIndex: 92,
-      lowTopOfPageBid: Money.create(2.8),
-      highTopOfPageBid: Money.create(4.5),
-    } as KeywordHistoricalMetrics,
-    {
-      impressions: 235680,
-      clicks: 8125,
-      ctr: 3.45,
-      avgCpc: Money.create(3.05),
-      cost: Money.create(24781.25),
-      conversions: 285,
-      conversionRate: 3.51,
-      costPerConversion: Money.create(86.95),
-      conversionValue: Money.create(42750),
-    } as KeywordPerformanceMetrics,
-    {
-      searchImpressionShare: 68.3,
-      searchAbsoluteTopImpressionShare: 38.5,
-      searchTopImpressionShare: 58.2,
-      searchImpressionShareLostBudget: 22.7,
-      searchImpressionShareLostRank: 9.0,
-    } as ImpressionShareMetrics,
-    {
-      estimatedClicks: 8500,
-      estimatedImpressions: 245000,
-      estimatedCost: Money.create(25925),
-      estimatedConversions: 298,
-      estimatedCtr: 3.47,
-      estimatedAvgCpc: Money.create(3.05),
-    } as KeywordForecastMetrics,
-    false,
-    new Date('2024-01-10'),
-    new Date('2024-11-26')
-  ),
-
-  new Keyword(
-    'kw_005',
-    'ag_002',
-    'camp_001',
-    'cheap running shoes',
-    KeywordMatchType.PHRASE_MATCH,
-    KeywordStatus.PAUSED,
-    'https://example.com/budget-shoes',
-    {
-      bidAmount: Money.create(1.2),
-      firstPageBid: Money.create(0.7),
-      topOfPageBid: Money.create(1.0),
-      firstPositionBid: Money.create(1.5),
-    } as KeywordBid,
-    3,
-    {
-      expectedCtr: QualityScoreStatus.BELOW_AVERAGE,
-      adRelevance: QualityScoreStatus.BELOW_AVERAGE,
-      landingPageExperience: QualityScoreStatus.BELOW_AVERAGE,
-    } as QualityScoreComponents,
-    {
-      avgMonthlySearches: 49000,
-      competitionLevel: CompetitionLevel.MEDIUM,
-      competitionIndex: 55,
-      lowTopOfPageBid: Money.create(0.8),
-      highTopOfPageBid: Money.create(1.4),
-    } as KeywordHistoricalMetrics,
-    {
-      impressions: 68540,
-      clicks: 412,
-      ctr: 0.6,
-      avgCpc: Money.create(1.15),
-      cost: Money.create(473.8),
-      conversions: 2,
-      conversionRate: 0.49,
-      costPerConversion: Money.create(236.9),
-      conversionValue: Money.create(300),
-    } as KeywordPerformanceMetrics,
-    {
-      searchImpressionShare: 38.5,
-      searchAbsoluteTopImpressionShare: 8.2,
-      searchTopImpressionShare: 22.5,
-      searchImpressionShareLostBudget: 5.5,
-      searchImpressionShareLostRank: 56.0,
-    } as ImpressionShareMetrics,
-    null,
-    false,
-    new Date('2024-03-05'),
-    new Date('2024-11-26')
-  ),
-
-  // ...repeat same pattern for all remaining keywords (kw_006 to kw_010)
-  // replacing new Money(...) with Money.create(...)
-
+export const keywordsData: Keyword[] = [
+  {
+    id: '1',
+    keyword: 'ai and machine learning',
+    matchType: 'Exact match',
+    campaign: 'Search 9th Oct - AI Courses in Chandigarh | Learn Artificial Intelligence',
+    adGroup: 'Ad group',
+    status: 'Eligible',
+    finalUrl: 'https://example.com/ai-courses',
+    impressions: 203,
+    clicks: 0,
+    cost: 0,
+    conversions: 0
+  },
+  {
+    id: '2',
+    keyword: '[ai course in chandigarh]',
+    matchType: 'Exact match',
+    campaign: 'Search 9th Oct - AI Courses in Chandigarh | Learn Artificial Intelligence',
+    adGroup: 'Ad group',
+    status: 'Eligible',
+    finalUrl: 'https://example.com/ai-courses',
+    impressions: 62,
+    clicks: 0,
+    cost: 0,
+    conversions: 0
+  },
+  {
+    id: '3',
+    keyword: '[ai training in chandigarh]',
+    matchType: 'Exact match',
+    campaign: 'Search 9th Oct - AI Courses in Chandigarh | Learn Artificial Intelligence',
+    adGroup: 'Ad group',
+    status: 'Eligible',
+    finalUrl: 'https://example.com/ai-courses',
+    impressions: 0,
+    clicks: 0,
+    cost: 0,
+    conversions: 0
+  }
 ];
+
+export const negativeKeywordsData: NegativeKeyword[] = [ 
+  {
+    id: '1',
+    negativeKeyword: '[a day goa ai intensive course with google]',
+    addedTo: 'Search 9th Oct - AI Courses in Chandigarh | Learn Artificial Intelligence',
+    level: 'Ad group',
+    matchType: 'Exact match'
+  },
+  {
+    id: '2',
+    negativeKeyword: '[ai tutorial]',
+    addedTo: 'Search 9th Oct',
+    level: 'Campaign',
+    matchType: 'Broad match'
+  },
+  {
+    id: '3',
+    negativeKeyword: 'arduino',
+    addedTo: 'Search 9th Oct',
+    level: 'Campaign',
+    matchType: 'Broad match'
+  },
+  {
+    id: '4',
+    negativeKeyword: 'class 10/12',
+    addedTo: 'Search 9th Oct',
+    level: 'Campaign',
+    matchType: 'Broad match'
+  },
+  {
+    id: '5',
+    negativeKeyword: '[computer class in]',
+    addedTo: 'Search 9th Oct - AI Courses in Chandigarh | Learn Artificial Intelligence',
+    level: 'Ad group',
+    matchType: 'Exact match'
+  },
+  {
+    id: '6',
+    negativeKeyword: 'coursera',
+    addedTo: 'Search 9th Oct',
+    level: 'Campaign',
+    matchType: 'Broad match'
+  },
+  {
+    id: '7',
+    negativeKeyword: 'crack',
+    addedTo: 'Search 9th Oct',
+    level: 'Campaign',
+    matchType: 'Broad match'
+  },
+  {
+    id: '8',
+    negativeKeyword: 'definition',
+    addedTo: 'Search 9th Oct',
+    level: 'Campaign',
+    matchType: 'Broad match'
+  }
+];
+
+export const urlInclusionsData: URLInclusion[] = [];
+export const chartsDataPoints = [
+  { x: 50, y: 100 }, { x: 100, y: 60 }, { x: 150, y: 50 }, { x: 200, y: 90 },
+  { x: 250, y: 100 }, { x: 300, y: 110 }, { x: 350, y: 120 }, { x: 400, y: 130 },
+  { x: 450, y: 115 }, { x: 500, y: 105 }, { x: 550, y: 130 }, { x: 600, y: 140 },
+  { x: 650, y: 150 }, { x: 700, y: 160 }, { x: 750, y: 165 }, { x: 800, y: 168 },
+  { x: 850, y: 170 }, { x: 900, y: 168 }, { x: 950, y: 165 }, { x: 1000, y: 168 },
+  { x: 1050, y: 170 }, { x: 1100, y: 168 }, { x: 1150, y: 170 }, { x: 1200, y: 168 },
+  { x: 1250, y: 170 }, { x: 1300, y: 168 }, { x: 1350, y: 170 }
+];
+
